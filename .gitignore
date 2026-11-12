@@ -1,4 +1,4 @@
-# Dependencias
+# Dependencies
 node_modules/
 
 # Builds
@@ -9,10 +9,10 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 
-# Caché local de datos descargados (listings de Simplify)
+# Local cache of downloaded data (Simplify listings)
 .cache/
 
-# Secretos y datos personales: nunca al repo
+# Secrets and personal data: never commit them
 .env
 .env.*
 !.env.example
@@ -21,7 +21,7 @@ service-account*.json
 credentials*.json
 resume*.pdf
 
-# Sistema
+# System
 .DS_Store
 *.log
 coverage/

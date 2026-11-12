@@ -1,7 +1,7 @@
 {
   "name": "uni",
   "private": true,
-  "description": "Descubre internships abiertas, filtra por elegibilidad y sincroniza tus aplicaciones con Google Sheets.",
+  "description": "Find open internships, filter them by eligibility for international students, and sync your applications with Google Sheets.",
   "license": "MIT",
   "packageManager": "npm@11.6.2",
   "engines": {
