@@ -10,5 +10,5 @@ indent_style = space
 indent_size = 2
 
 [*.md]
-# Dos espacios al final son un salto de línea en Markdown.
+# Two trailing spaces are a Markdown line break.
 trim_trailing_whitespace = false
