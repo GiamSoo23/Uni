@@ -1,5 +1,5 @@
-# Formato, lint, typecheck, tests y build de todo el monorepo en cada PR y en
-# cada push a main.
+# Formatting, lint, typecheck, tests and build for the whole monorepo on every
+# PR and every push to main.
 name: CI
 
 on:
@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 env:
-  HUSKY: '0' # los hooks de git solo hacen falta en tu máquina
+  HUSKY: '0' # git hooks are only needed on your machine
   NEXT_TELEMETRY_DISABLED: '1'
   TURBO_TELEMETRY_DISABLED: '1'
 
