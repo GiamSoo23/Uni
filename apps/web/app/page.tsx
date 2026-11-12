@@ -1,4 +1,10 @@
-import { availableTerms, filterJobs, type SyncResult } from '@uni/core'
+import {
+  availableTerms,
+  BASE_POLICY_INDEX,
+  eligibilityFor,
+  filterJobs,
+  type SyncResult,
+} from '@uni/core'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { FilterForm } from '@/components/filter-form'
@@ -35,7 +41,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
   }
 
   const now = new Date()
-  const filtered = filterJobs(listings.jobs, toJobFilters(params), now)
+  const policies = BASE_POLICY_INDEX
+  const filters = toJobFilters(params)
+  const filtered = filterJobs(listings.jobs, filters, { now, policies })
+  const hidden = filters.hideIneligible
+    ? filterJobs(listings.jobs, { ...filters, hideIneligible: false }, { now, policies }).filter(
+        (job) => eligibilityFor(job, policies).status === 'ineligible',
+      )
+    : []
+  const hiddenByCompany = hidden.filter(
+    (job) => eligibilityFor(job, policies).source === 'company',
+  ).length
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const page = Math.min(params.page, pageCount)
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -48,6 +64,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
           <strong className="text-zinc-900 dark:text-zinc-100">{filtered.length}</strong> roles
           match these filters, out of {activeCount.toLocaleString('en')} active on Simplify. Last
           sync: {formatDateTime(listings.fetchedAt)}. Refreshes every {syncInterval()}.
+          {hidden.length > 0 && ` ${hiddenSummary(hidden.length, hiddenByCompany)}`}
         </p>
         <SyncButton />
       </section>
@@ -70,7 +87,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
       ) : (
         <ul className="space-y-3">
           {visible.map((job) => (
-            <JobCard key={job.id} job={job} now={now} />
+            <JobCard key={job.id} job={job} eligibility={eligibilityFor(job, policies)} now={now} />
           ))}
         </ul>
       )}
@@ -98,6 +115,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
       )}
     </Shell>
   )
+}
+
+function hiddenSummary(hidden: number, byCompany: number): string {
+  const roles = hidden === 1 ? 'role' : 'roles'
+  const detail = byCompany > 0 ? ` (${byCompany} by company policy)` : ''
+  return `${hidden} ${roles} hidden because they don’t accept international students${detail}.`
 }
 
 function syncInterval(): string {

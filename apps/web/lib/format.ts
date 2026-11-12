@@ -1,4 +1,4 @@
-import type { Sponsorship } from '@uni/core'
+import type { EligibilityReason } from '@uni/core'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const relative = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
@@ -14,12 +14,14 @@ export function formatDateTime(date: Date): string {
   return dateTime.format(date)
 }
 
-export const SPONSORSHIP_LABELS: Record<
-  Sponsorship,
-  { text: string; tone: 'ok' | 'bad' | 'neutral' }
-> = {
-  offers: { text: 'Offers sponsorship', tone: 'ok' },
-  does_not_offer: { text: 'No sponsorship', tone: 'bad' },
-  citizenship_required: { text: 'Citizenship required', tone: 'bad' },
-  unknown: { text: 'Sponsorship not stated', tone: 'neutral' },
+export type Tone = 'ok' | 'bad' | 'neutral'
+
+export const ELIGIBILITY_LABELS: Record<EligibilityReason, { text: string; tone: Tone }> = {
+  offers_sponsorship: { text: 'Offers sponsorship', tone: 'ok' },
+  accepts: { text: 'Accepts international students', tone: 'ok' },
+  no_sponsorship: { text: 'No sponsorship', tone: 'bad' },
+  us_person_required: { text: 'U.S. person required', tone: 'bad' },
+  citizenship_required: { text: 'U.S. citizenship required', tone: 'bad' },
+  clearance_required: { text: 'Security clearance required', tone: 'bad' },
+  not_verified: { text: 'Eligibility not verified', tone: 'neutral' },
 }
