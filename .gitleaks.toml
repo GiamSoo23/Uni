@@ -1,0 +1,7 @@
+# Configuración de gitleaks: las reglas por defecto, sin excepciones por ahora.
+# Si un hallazgo es inofensivo, agrega una excepción estrecha (ruta Y patrón)
+# con un comentario que explique por qué.
+title = "Uni"
+
+[extend]
+useDefault = true
