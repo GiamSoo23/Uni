@@ -11,7 +11,10 @@ Los cambios importantes de Uni. El formato sigue [Keep a Changelog](https://keep
 - Sincronización semanal con caché local y ETag, y botón "Sync ahora".
 - Si GitHub falla, la app sigue mostrando la última copia buena.
 
+- Deploy en Vercel: la caché usa `/tmp` y Node queda fijado en 24.x. Guía en `docs/DEPLOY.md`.
+
 ### Seguridad
 
-- La app solo escucha en `127.0.0.1`.
+- En línea, Vercel Authentication protege todos los deployments: solo entra el dueño.
+- En local, la app solo escucha en `127.0.0.1`.
 - gitleaks revisa todo el historial en cada pull request.
