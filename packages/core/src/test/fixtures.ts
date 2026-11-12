@@ -1,4 +1,22 @@
+import type { CompanyPolicy } from '../companies/policy'
 import type { Job } from '../jobs/job'
+
+export function policy(overrides: Partial<CompanyPolicy> = {}): CompanyPolicy {
+  return {
+    company: 'Acme',
+    aliases: [],
+    policy: 'citizenship_required',
+    source: 'posting',
+    evidence: [
+      {
+        quote: 'U.S. citizenship is required for this role',
+        url: 'https://jobs.example.test/acme/1',
+        checkedAt: '2026-11-12',
+      },
+    ],
+    ...overrides,
+  }
+}
 
 /** A record with the real shape of listings.json (checked on Nov 11, 2026). */
 export function rawListing(overrides: Record<string, unknown> = {}): Record<string, unknown> {
