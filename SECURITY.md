@@ -1,37 +1,37 @@
-# Seguridad
+# Security
 
-Uni corre en tu propia computadora o en tu propia cuenta. Su autor no tiene un servidor y no ve tus datos.
+Uni runs on your own computer or in your own accounts. Its author runs no server and can't see your data.
 
-## Reportar una vulnerabilidad
+## Reporting a vulnerability
 
-Por favor **no abras un issue público**. Usa el
-[reporte privado de vulnerabilidades](https://github.com/GiamSoo23/Uni/security/advisories/new)
-de GitHub e incluye cómo reproducir el problema. Uni lo mantiene una sola persona, así que la respuesta puede tardar unos días.
+Please **don't open a public issue**. Use GitHub's
+[private vulnerability report](https://github.com/GiamSoo23/Uni/security/advisories/new)
+and include how to reproduce the problem. Uni is maintained by one person, so a reply may take a few days.
 
-## Que el repo sea público no da acceso a tu app
+## A public repo doesn't give access to your app
 
-- **El código es público, tus llaves no.** En local viven en `apps/web/.env.local`, y en Vercel en las variables de entorno del proyecto. `.gitignore` las excluye y gitleaks revisa todo el historial en cada pull request.
-- **En línea, solo entra el dueño.** El deployment en Vercel usa Vercel Authentication en **todos** los deployments, incluido producción. Quien no inicie sesión con una cuenta con acceso al proyecto no llega a la app ni a "Sync ahora". Ver [docs/DEPLOY.md](docs/DEPLOY.md).
-- **En local, solo tu computadora.** `npm run dev` y `npm start` usan `127.0.0.1`, así que nadie en tu misma red Wi-Fi puede abrirla.
-- **Los forks no reciben secretos.** GitHub Actions no entrega los secretos del repo a pull requests que vienen de forks, y los workflows no usan `pull_request_target`.
+- **The code is public, your keys aren't.** Locally they live in `apps/web/.env.local`; on Vercel, in the project's environment variables. `.gitignore` excludes them and gitleaks scans the full history on every pull request.
+- **Online, only the owner gets in.** The Vercel project uses Vercel Authentication on **all** deployments, production included. Anyone who doesn't sign in with an account that has access to the project never reaches the app or "Sync now". See [docs/DEPLOY.md](docs/DEPLOY.md).
+- **Locally, only your computer.** `npm run dev` and `npm start` listen on `127.0.0.1`, so nobody on the same Wi-Fi can open the app.
+- **Forks don't get secrets.** GitHub Actions doesn't give the repo's secrets to pull requests from forks, and no workflow uses `pull_request_target`.
 
-## Modelo de seguridad
+## Security model
 
-| Activo                         | Dónde vive                                 | Cómo se protege                                                                |
-| ------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------ |
-| Datos de Simplify              | `apps/web/.cache/` o `/tmp` en Vercel      | Datos públicos. Se validan con Zod y los links que no son http(s) se descartan |
-| La app en línea                | Vercel                                     | Vercel Authentication en todos los deployments                                 |
-| Llave de Claude (M5)           | `.env.local` o variables de entorno Vercel | Solo la lee el servidor. Nunca llega al navegador ni a los logs                |
-| Service account de Google (M3) | Variables de entorno, nunca un archivo     | Solo tiene acceso al Sheet que compartes con ella                              |
-| Tu resume y tu Sheet           | Tu máquina y tu cuenta de Google           | Nunca entran al repo                                                           |
+| Asset                       | Where it lives                                  | How it's protected                                                     |
+| --------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------- |
+| Simplify data               | `apps/web/.cache/`, or `/tmp` on Vercel         | Public data. Validated with Zod; links that aren't http(s) are dropped |
+| The app online              | Vercel                                          | Vercel Authentication on all deployments                               |
+| Claude key (M5)             | `.env.local` or Vercel environment variables    | Read only by the server. Never sent to the browser or written to logs  |
+| Google service account (M3) | Environment variables, never a file in the repo | Can only access the Sheet you share with it                            |
+| Your resume and your Sheet  | Your computer and your Google account           | Never committed                                                        |
 
-## Antes de gastar dinero (M6)
+## Before spending money (M6)
 
-- **Tope de gasto en Claude:** un límite mensual en la consola de Anthropic, más un máximo de llamadas por sync dentro de la app.
-- **Espera mínima entre syncs manuales**, como segunda barrera detrás del login.
-- Si la app llega a tener más de un usuario, hará falta un login propio con lista de emails permitidos, verificado en cada server action.
+- **A cap on Claude spending:** a monthly limit in the Anthropic Console, plus a maximum number of calls per sync inside the app.
+- **A minimum wait between manual syncs**, as a second barrier behind the login.
+- If the app ever has more than one user, it will need its own login with an allowlist of emails, checked in every server action.
 
-## Qué se prueba
+## What's tested
 
-- gitleaks revisa todo el historial de git en cada pull request y en cada push a `main`.
-- Los tests de `packages/core` cubren la validación de datos externos, incluido el rechazo de links `javascript:`.
+- gitleaks scans the full git history on every pull request and every push to `main`.
+- The `packages/core` tests cover validation of external data, including rejecting `javascript:` links.

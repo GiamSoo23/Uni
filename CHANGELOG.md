@@ -1,20 +1,23 @@
 # Changelog
 
-Los cambios importantes de Uni. El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/).
+Notable changes to Uni. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [SemVer](https://semver.org/).
 
-## [Sin publicar]
+## [Unreleased]
 
-### Agregado
+### Added
 
-- Bandeja web con los roles abiertos del repo de Simplify, con link directo para aplicar.
-- Filtros por temporada, categoría, región, fecha de publicación, texto y elegibilidad.
-- Sincronización semanal con caché local y ETag, y botón "Sync ahora".
-- Si GitHub falla, la app sigue mostrando la última copia buena.
+- A job inbox with the open roles from the Simplify repo, each with a direct link to apply.
+- Filters for term, category, region, posting date, text and eligibility.
+- A weekly sync with a local cache and ETag, and a "Sync now" button.
+- If GitHub fails, the app keeps showing the last good copy.
+- Vercel deployment: the cache uses `/tmp` and Node is pinned to 24.x. Guide in `docs/DEPLOY.md`.
 
-- Deploy en Vercel: la caché usa `/tmp` y Node queda fijado en 24.x. Guía en `docs/DEPLOY.md`.
+### Changed
 
-### Seguridad
+- All documentation, the interface and the GitHub metadata are in English.
 
-- En línea, Vercel Authentication protege todos los deployments: solo entra el dueño.
-- En local, la app solo escucha en `127.0.0.1`.
-- gitleaks revisa todo el historial en cada pull request.
+### Security
+
+- Online, Vercel Authentication protects every deployment: only the owner gets in.
+- Locally, the app only listens on `127.0.0.1`.
+- gitleaks scans the full history on every pull request.

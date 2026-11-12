@@ -1,39 +1,39 @@
-# Contribuir a Uni
+# Contributing to Uni
 
-Gracias por ayudar. Uni tiene una regla de diseño por encima de las demás: **cada persona corre su propia instancia con sus propias llaves y sus propios datos.** No se aceptan cambios que necesiten un servidor central. [PLAN.md](PLAN.md) explica el porqué de las decisiones.
+Thanks for helping. Uni has one design rule above the others: **each person runs their own instance, with their own keys and their own data.** Changes that need a central server won't be accepted. [PLAN.md](PLAN.md) explains why things are the way they are.
 
-## Correr el proyecto
+## Run the project
 
 ```bash
 npm install
 npm run dev   # http://127.0.0.1:3000
 ```
 
-## Cómo se trabaja
+## How work happens
 
-1. **Abre un issue primero**, tanto para bugs como para ideas, para acordar el cambio antes de escribir código.
-2. Crea una rama desde `main`, nombrada por área: `core/…`, `web/…`, `sheets/…`, `ai/…`, `infra/…`, `fix/…`, `docs/…`.
-3. Escribe [Conventional Commits](https://www.conventionalcommits.org/) en pasos pequeños.
-4. Abre un pull request con `Closes #N`. Se integra con **Rebase and merge** cuando el CI está en verde.
+1. **Open an issue first**, for bugs and ideas alike, so we can agree before you write code.
+2. Create a branch from `main`, named by area: `core/…`, `web/…`, `sheets/…`, `ai/…`, `infra/…`, `fix/…`, `docs/…`.
+3. Write [Conventional Commits](https://www.conventionalcommits.org/) in small steps.
+4. Open a pull request with `Closes #N`. It's merged with **Rebase and merge** once CI is green.
 
 ## Commits
 
-Formato: `tipo(scope): descripción`, en inglés y en minúscula, describiendo qué cambia para quien usa la app.
+Format: `type(scope): description`, in English and lowercase, describing what changes for the person using the app.
 
-| Tipo       | Para qué                                     |
-| ---------- | -------------------------------------------- |
-| `feat`     | Funcionalidad nueva                          |
-| `fix`      | Corrección de un bug                         |
-| `docs`     | Solo documentación                           |
-| `test`     | Solo pruebas                                 |
-| `refactor` | Cambio interno sin cambiar el comportamiento |
-| `style`    | Formato, sin cambiar la lógica               |
-| `chore`    | Configuración, dependencias, herramientas    |
-| `ci`       | GitHub Actions                               |
+| Type       | For                                  |
+| ---------- | ------------------------------------ |
+| `feat`     | A new feature                        |
+| `fix`      | A bug fix                            |
+| `docs`     | Documentation only                   |
+| `test`     | Tests only                           |
+| `refactor` | An internal change, same behavior    |
+| `style`    | Formatting, no logic change          |
+| `chore`    | Configuration, dependencies, tooling |
+| `ci`       | GitHub Actions                       |
 
-Scopes permitidos: `core`, `web`, `sheets`, `ai`, `infra`, `deps`. Un cambio que no pertenece a un área va sin scope, por ejemplo `docs: contributing guide`.
+Allowed scopes: `core`, `web`, `sheets`, `ai`, `infra`, `deps`. A change that doesn't belong to one area has no scope, for example `docs: contributing guide`.
 
-Ejemplos:
+Examples:
 
 ```
 feat(web): a Sync now button that skips the weekly wait
@@ -41,20 +41,20 @@ fix(core): count "Arlington County, Arlington, VA" as a US location
 ci: check commit messages on pull requests
 ```
 
-Un hook local (husky) revisa el mensaje al hacer commit, y el CI revisa todos los commits del pull request.
+A local hook (husky) checks the message when you commit, and CI checks every commit in the pull request.
 
-## Revisiones
+## Checks
 
-| Qué                           | Comando                |
-| ----------------------------- | ---------------------- |
-| Todo (lint, typecheck, tests) | `npm run check`        |
-| Formato                       | `npm run format:check` |
-| Build                         | `npm run build`        |
+| What                            | Command                |
+| ------------------------------- | ---------------------- |
+| Everything (lint, types, tests) | `npm run check`        |
+| Formatting                      | `npm run format:check` |
+| Build                           | `npm run build`        |
 
-## Secretos y datos personales
+## Secrets and personal data
 
-Nunca subas llaves, contraseñas, un `.env` lleno, tu resume ni datos de tu Sheet. gitleaks revisa todo el historial en el CI. Para pruebas usa datos inventados.
+Never commit keys, passwords, a filled-in `.env`, your resume or data from your Sheet. gitleaks scans the full history in CI. Use made-up data in tests.
 
-## Código de conducta
+## Code of conduct
 
-Participar implica seguir el [Código de conducta](CODE_OF_CONDUCT.md).
+Taking part means following the [Code of Conduct](CODE_OF_CONDUCT.md).
