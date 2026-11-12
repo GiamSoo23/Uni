@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Uni</title>
+  <rect width="64" height="64" rx="14" fill="#ffffff"/>
+  <!-- Left curve and point of the hook -->
+  <path fill="#131c33" d="M32 54 A18 18 0 0 1 14 30 L13 21 L21.5 33 A11 11 0 0 0 32 47 Z"/>
+  <!-- Shank -->
+  <path fill="#e8264d" d="M32 54 A18 18 0 0 0 50 36 V17 H43 V36 A11 11 0 0 1 32 47 Z"/>
+  <!-- Eye -->
+  <circle cx="46.5" cy="11" r="5" fill="none" stroke="#e8264d" stroke-width="3.5"/>
+</svg>
