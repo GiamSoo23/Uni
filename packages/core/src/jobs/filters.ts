@@ -1,3 +1,5 @@
+import { eligibilityFor } from '../companies/eligibility'
+import { EMPTY_POLICY_INDEX, type PolicyIndex } from '../companies/policy'
 import type { Category, Job } from './job'
 import { isUSLocation } from './location'
 
@@ -9,12 +11,18 @@ export interface JobFilters {
   /** Accepted categories. Empty means all of them. */
   categories: readonly Category[]
   region: Region
-  /** Hides roles where the source says there is no sponsorship or citizenship is required. */
+  /** Hides roles an international student can't apply to (see `eligibilityFor`). */
   hideIneligible: boolean
   /** Only roles posted in the last N days. null for any date. */
   postedWithinDays: number | null
   /** Free text matched against company and title. */
   query: string
+}
+
+export interface FilterOptions {
+  now?: Date
+  /** Company policies used to decide eligibility. Empty by default. */
+  policies?: PolicyIndex
 }
 
 export const DEFAULT_FILTERS: JobFilters = {
@@ -28,12 +36,12 @@ export const DEFAULT_FILTERS: JobFilters = {
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-export function isIneligible(job: Job): boolean {
-  return job.sponsorship === 'does_not_offer' || job.sponsorship === 'citizenship_required'
-}
-
 /** Applies the hard filters and sorts from newest to oldest. */
-export function filterJobs(jobs: readonly Job[], filters: JobFilters, now = new Date()): Job[] {
+export function filterJobs(
+  jobs: readonly Job[],
+  filters: JobFilters,
+  { now = new Date(), policies = EMPTY_POLICY_INDEX }: FilterOptions = {},
+): Job[] {
   const query = filters.query.trim().toLowerCase()
   const since =
     filters.postedWithinDays === null ? null : now.getTime() - filters.postedWithinDays * DAY_MS
@@ -44,7 +52,9 @@ export function filterJobs(jobs: readonly Job[], filters: JobFilters, now = new 
       if (filters.term !== null && !job.terms.includes(filters.term)) return false
       if (filters.categories.length > 0 && !filters.categories.includes(job.category)) return false
       if (filters.region === 'us' && !job.locations.some(isUSLocation)) return false
-      if (filters.hideIneligible && isIneligible(job)) return false
+      if (filters.hideIneligible && eligibilityFor(job, policies).status === 'ineligible') {
+        return false
+      }
       if (since !== null && job.postedAt.getTime() < since) return false
       if (query !== '') {
         const haystack = `${job.company} ${job.title}`.toLowerCase()
