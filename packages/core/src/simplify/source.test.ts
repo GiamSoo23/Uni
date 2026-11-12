@@ -36,7 +36,7 @@ function sync(fetchImpl: typeof fetch, extra: Partial<SyncOptions> = {}) {
 }
 
 describe('syncSimplifyListings', () => {
-  it('descarga, valida y guarda la copia local', async () => {
+  it('downloads, validates and saves the local copy', async () => {
     const fetchImpl = vi.fn<typeof fetch>(() => Promise.resolve(jsonResponse([rawListing()])))
     const result = await sync(fetchImpl)
 
@@ -48,7 +48,7 @@ describe('syncSimplifyListings', () => {
     expect(meta).toMatchObject({ url: LISTINGS_URL, etag: '"v1"', fetchedAt: clock.toISOString() })
   })
 
-  it('usa la copia local sin red mientras sea reciente', async () => {
+  it('uses the local copy without the network while it is fresh', async () => {
     const fetchImpl = vi.fn<typeof fetch>(() => Promise.resolve(jsonResponse([rawListing()])))
     await sync(fetchImpl)
     clock = new Date(clock.getTime() + HOUR)
@@ -58,7 +58,7 @@ describe('syncSimplifyListings', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1)
   })
 
-  it('consulta con ETag cuando la copia expira y acepta 304', async () => {
+  it('asks with an ETag when the copy expires and accepts a 304', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(jsonResponse([rawListing()]))
@@ -73,11 +73,11 @@ describe('syncSimplifyListings', () => {
     expect(headers['if-none-match']).toBe('"v1"')
   })
 
-  it('force ignora la edad de la copia local', async () => {
+  it('force ignores the age of the local copy', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(jsonResponse([rawListing()]))
-      .mockResolvedValueOnce(jsonResponse([rawListing(), rawListing({ id: 'nuevo' })], '"v2"'))
+      .mockResolvedValueOnce(jsonResponse([rawListing(), rawListing({ id: 'new' })], '"v2"'))
     await sync(fetchImpl)
 
     const result = await sync(fetchImpl, { force: true })
@@ -85,23 +85,23 @@ describe('syncSimplifyListings', () => {
     expect(result.jobs).toHaveLength(2)
   })
 
-  it('si falla la red usa la última copia buena', async () => {
+  it('falls back to the last good copy when the network fails', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(jsonResponse([rawListing()]))
-      .mockRejectedValueOnce(new Error('sin conexión'))
+      .mockRejectedValueOnce(new Error('offline'))
     await sync(fetchImpl)
 
     const result = await sync(fetchImpl, { force: true })
-    expect(result).toMatchObject({ status: 'stale', error: 'sin conexión' })
+    expect(result).toMatchObject({ status: 'stale', error: 'offline' })
     expect(result.jobs).toHaveLength(1)
   })
 
-  it('una descarga con formato inválido no reemplaza la copia buena', async () => {
+  it('a download with an invalid format does not replace the good copy', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(jsonResponse([rawListing()]))
-      .mockResolvedValueOnce(jsonResponse({ cambio: 'de formato' }, '"v2"'))
+      .mockResolvedValueOnce(jsonResponse({ format: 'changed' }, '"v2"'))
     await sync(fetchImpl)
 
     const result = await sync(fetchImpl, { force: true })
@@ -112,7 +112,7 @@ describe('syncSimplifyListings', () => {
     expect(saved).toHaveLength(1)
   })
 
-  it('devuelve stale ante un error HTTP con copia local', async () => {
+  it('returns stale on an HTTP error when there is a local copy', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(jsonResponse([rawListing()]))
@@ -124,15 +124,15 @@ describe('syncSimplifyListings', () => {
     expect(result.error).toContain('429')
   })
 
-  it('lanza el error si no hay copia local', async () => {
-    const fetchImpl = vi.fn<typeof fetch>().mockRejectedValue(new Error('sin conexión'))
-    await expect(sync(fetchImpl)).rejects.toThrow('sin conexión')
+  it('throws the error when there is no local copy', async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockRejectedValue(new Error('offline'))
+    await expect(sync(fetchImpl)).rejects.toThrow('offline')
   })
 
-  it('ignora una copia local corrupta y vuelve a descargar', async () => {
+  it('ignores a corrupt local copy and downloads again', async () => {
     const fetchImpl = vi.fn<typeof fetch>(() => Promise.resolve(jsonResponse([rawListing()])))
     await sync(fetchImpl)
-    await writeFile(path.join(cacheDir, 'simplify/listings.json'), '{roto', 'utf8')
+    await writeFile(path.join(cacheDir, 'simplify/listings.json'), '{broken', 'utf8')
 
     const result = await sync(fetchImpl)
     expect(result.status).toBe('downloaded')

@@ -18,7 +18,7 @@ describe('isUSLocation', () => {
     'Seattle, WA, USA',
     'Arlington County, Arlington, VA',
     'Long Island City, Queens, NY',
-  ])('reconoce "%s" como EE. UU.', (location) => {
+  ])('recognizes "%s" as the US', (location) => {
     expect(isUSLocation(location)).toBe(true)
   })
 
@@ -32,7 +32,7 @@ describe('isUSLocation', () => {
     'United Kingdom',
     'Bangalore, India',
     '',
-  ])('descarta "%s"', (location) => {
+  ])('rejects "%s"', (location) => {
     expect(isUSLocation(location)).toBe(false)
   })
 })

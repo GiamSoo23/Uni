@@ -4,26 +4,26 @@ import { z } from 'zod'
 import { parseListings, type ParsedListings } from './schema'
 
 /**
- * JSON estructurado que el repo de Simplify mantiene junto al README.
- * El repo no declara licencia: cada instancia lo descarga, no se redistribuye.
+ * Structured JSON that the Simplify repo keeps next to its README.
+ * The repo declares no license: each instance downloads it, and Uni never redistributes it.
  */
 export const SIMPLIFY_LISTINGS_URL =
   'https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/.github/scripts/listings.json'
 
 /**
- * - cache: el archivo local es más reciente que maxAgeMs.
- * - not_modified: GitHub respondió 304 (ETag), el archivo local sigue vigente.
- * - downloaded: se descargó una versión nueva.
- * - stale: falló la descarga y se usa la última copia buena.
+ * - cache: the local file is newer than maxAgeMs.
+ * - not_modified: GitHub answered 304 (ETag), so the local file is still current.
+ * - downloaded: a new version was downloaded.
+ * - stale: the download failed and the last good copy is used.
  */
 export type SyncStatus = 'cache' | 'not_modified' | 'downloaded' | 'stale'
 
 export interface SyncOptions {
-  /** Carpeta de caché. Se crea `simplify/` dentro. */
+  /** Cache folder. A `simplify/` folder is created inside it. */
   cacheDir: string
-  /** Edad máxima de la copia local antes de consultar a GitHub. */
+  /** Maximum age of the local copy before asking GitHub. */
   maxAgeMs: number
-  /** Ignora la edad de la copia local ("Sync ahora"). */
+  /** Ignores the age of the local copy ("Sync now"). */
   force?: boolean
   url?: string
   fetchImpl?: typeof fetch
@@ -33,9 +33,9 @@ export interface SyncOptions {
 
 export interface SyncResult extends ParsedListings {
   status: SyncStatus
-  /** Última vez que el contenido se confirmó con GitHub. */
+  /** Last time the content was confirmed with GitHub. */
   fetchedAt: Date
-  /** Motivo del fallo cuando status es 'stale'. */
+  /** Why the sync failed, when status is 'stale'. */
   error?: string
 }
 
@@ -108,14 +108,14 @@ export async function syncSimplifyListings(options: SyncOptions): Promise<SyncRe
   }
 
   if (!response.ok) {
-    return fallback(new Error(`GitHub respondió ${response.status} al descargar listings.json`))
+    return fallback(new Error(`GitHub answered ${response.status} when downloading listings.json`))
   }
 
   let text: string
   let parsed: ParsedListings
   try {
     text = await response.text()
-    // Validar antes de escribir: una descarga mala no reemplaza la última copia buena.
+    // Validate before writing: a bad download never replaces the last good copy.
     parsed = parseListings(JSON.parse(text) as unknown)
   } catch (error) {
     return fallback(error)

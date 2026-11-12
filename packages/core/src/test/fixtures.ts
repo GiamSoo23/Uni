@@ -1,6 +1,6 @@
 import type { Job } from '../jobs/job'
 
-/** Registro con la forma real de listings.json (verificada el 11 nov 2026). */
+/** A record with the real shape of listings.json (checked on Nov 11, 2026). */
 export function rawListing(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     source: 'Simplify',

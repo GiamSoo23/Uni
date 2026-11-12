@@ -11,14 +11,14 @@ function isHttpUrl(value: string): boolean {
 }
 
 /**
- * Un registro de `.github/scripts/listings.json` del repo de Simplify.
- * Los campos opcionales tienen valor por defecto para tolerar registros viejos.
+ * A record from `.github/scripts/listings.json` in the Simplify repo.
+ * Optional fields have defaults so older records still parse.
  */
 export const simplifyListingSchema = z.object({
   id: z.string().min(1),
   company_name: z.string().min(1),
   title: z.string().min(1),
-  url: z.string().refine(isHttpUrl, 'url debe ser http(s)'),
+  url: z.string().refine(isHttpUrl, 'url must be http(s)'),
   locations: z.array(z.string()).default([]),
   terms: z.array(z.string()).default([]),
   category: z.string().default('Other'),
@@ -83,17 +83,17 @@ export function toJob(listing: SimplifyListing): Job {
 
 export interface ParsedListings {
   jobs: Job[]
-  /** Registros descartados por no cumplir el esquema. */
+  /** Records dropped because they did not match the schema. */
   invalid: number
 }
 
 /**
- * Valida el JSON completo. Un registro inválido se descarta y se cuenta,
- * para que un solo dato malo no tumbe la sincronización.
+ * Validates the whole JSON. An invalid record is dropped and counted, so one
+ * bad record never breaks the sync.
  */
 export function parseListings(raw: unknown): ParsedListings {
   if (!Array.isArray(raw)) {
-    throw new SimplifyFormatError('listings.json debe ser un arreglo')
+    throw new SimplifyFormatError('listings.json must be an array')
   }
   const jobs: Job[] = []
   let invalid = 0
@@ -103,7 +103,7 @@ export function parseListings(raw: unknown): ParsedListings {
     else invalid += 1
   }
   if (raw.length > 0 && jobs.length === 0) {
-    throw new SimplifyFormatError('Ningún registro cumple el esquema. ¿Cambió el formato?')
+    throw new SimplifyFormatError('No record matches the schema. Did the format change?')
   }
   return { jobs, invalid }
 }

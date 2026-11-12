@@ -8,7 +8,7 @@ import {
 } from './schema'
 
 describe('parseListings', () => {
-  it('normaliza un registro real de Simplify', () => {
+  it('normalizes a real Simplify record', () => {
     const { jobs, invalid } = parseListings([rawListing()])
     expect(invalid).toBe(0)
     expect(jobs).toHaveLength(1)
@@ -24,12 +24,12 @@ describe('parseListings', () => {
     expect(jobs[0]?.postedAt.toISOString()).toBe('2026-11-11T00:00:00.000Z')
   })
 
-  it('marca como inactiva una oferta oculta', () => {
+  it('marks a hidden role as inactive', () => {
     const { jobs } = parseListings([rawListing({ is_visible: false })])
     expect(jobs[0]?.active).toBe(false)
   })
 
-  it('aplica valores por defecto a campos opcionales ausentes', () => {
+  it('applies defaults to missing optional fields', () => {
     const minimal = rawListing()
     delete minimal.degrees
     delete minimal.sponsorship
@@ -40,17 +40,17 @@ describe('parseListings', () => {
     expect(jobs[0]?.updatedAt).toBeNull()
   })
 
-  it('descarta y cuenta registros inválidos sin fallar', () => {
+  it('drops and counts invalid records without failing', () => {
     const { jobs, invalid } = parseListings([
       rawListing(),
-      rawListing({ id: 'sin-url', url: undefined }),
-      'basura',
+      rawListing({ id: 'no-url', url: undefined }),
+      'garbage',
     ])
     expect(jobs).toHaveLength(1)
     expect(invalid).toBe(2)
   })
 
-  it('rechaza links que no son http(s)', () => {
+  it('rejects links that are not http(s)', () => {
     const { jobs, invalid } = parseListings([
       rawListing({ url: 'javascript:alert(1)' }),
       rawListing({ id: 'ok' }),
@@ -59,15 +59,15 @@ describe('parseListings', () => {
     expect(invalid).toBe(1)
   })
 
-  it('falla si el JSON no es un arreglo', () => {
+  it('fails when the JSON is not an array', () => {
     expect(() => parseListings({ listings: [] })).toThrow(SimplifyFormatError)
   })
 
-  it('falla si ningún registro cumple el esquema', () => {
+  it('fails when no record matches the schema', () => {
     expect(() => parseListings([{ foo: 1 }, { bar: 2 }])).toThrow(SimplifyFormatError)
   })
 
-  it('acepta un arreglo vacío', () => {
+  it('accepts an empty array', () => {
     expect(parseListings([])).toEqual({ jobs: [], invalid: 0 })
   })
 })
@@ -78,7 +78,7 @@ describe('normalizeCategory', () => {
     ['Software Engineering', 'Software'],
     ['Data Science, AI & Machine Learning', 'AI/ML/Data'],
     ['Product Management', 'Product'],
-    ['Algo nuevo', 'Other'],
+    ['Something new', 'Other'],
   ])('%s -> %s', (raw, expected) => {
     expect(normalizeCategory(raw)).toBe(expected)
   })
