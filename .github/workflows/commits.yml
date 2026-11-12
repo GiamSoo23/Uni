@@ -1,4 +1,4 @@
-# Revisa que cada commit del PR siga Conventional Commits (ver CONTRIBUTING.md).
+# Checks that every commit in the PR follows Conventional Commits (see CONTRIBUTING.md).
 name: Commits
 
 on:
