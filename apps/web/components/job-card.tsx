@@ -1,5 +1,5 @@
-import type { Job } from '@uni/core'
-import { daysAgo, SPONSORSHIP_LABELS } from '@/lib/format'
+import type { Eligibility, Job } from '@uni/core'
+import { daysAgo, ELIGIBILITY_LABELS } from '@/lib/format'
 
 const TONES = {
   ok: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
@@ -9,8 +9,54 @@ const TONES = {
 
 const MAX_LOCATIONS = 3
 
-export function JobCard({ job, now }: { job: Job; now: Date }) {
-  const sponsorship = SPONSORSHIP_LABELS[job.sponsorship]
+const SOURCE_TEXT = {
+  simplify: 'From Simplify, for this role.',
+  company: 'Company policy.',
+  none: 'Neither Simplify nor the company list says. Check the posting.',
+} as const
+
+function EligibilityBadge({ eligibility }: { eligibility: Eligibility }) {
+  const label = ELIGIBILITY_LABELS[eligibility.reason]
+  const evidence = eligibility.policy?.evidence[0]
+  const title = [
+    SOURCE_TEXT[eligibility.source],
+    eligibility.policy?.note,
+    evidence && `“${evidence.quote}” (checked ${evidence.checkedAt})`,
+  ]
+    .filter(Boolean)
+    .join(' ')
+  const className = `rounded px-1.5 py-0.5 ${TONES[label.tone]}`
+  const text = eligibility.source === 'company' ? `${label.text} · company` : label.text
+
+  if (evidence?.url) {
+    return (
+      <a
+        href={evidence.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={title}
+        className={`${className} underline decoration-dotted underline-offset-2`}
+      >
+        {text}
+      </a>
+    )
+  }
+  return (
+    <span title={title} className={className}>
+      {text}
+    </span>
+  )
+}
+
+export function JobCard({
+  job,
+  eligibility,
+  now,
+}: {
+  job: Job
+  eligibility: Eligibility
+  now: Date
+}) {
   const extraLocations = job.locations.length - MAX_LOCATIONS
 
   return (
@@ -23,9 +69,7 @@ export function JobCard({ job, now }: { job: Job; now: Date }) {
           {extraLocations > 0 && ` · +${extraLocations}`}
         </p>
         <div className="flex flex-wrap gap-1.5 pt-1 text-xs">
-          <span className={`rounded px-1.5 py-0.5 ${TONES[sponsorship.tone]}`}>
-            {sponsorship.text}
-          </span>
+          <EligibilityBadge eligibility={eligibility} />
           {job.terms.map((term) => (
             <span key={term} className={`rounded px-1.5 py-0.5 ${TONES.neutral}`}>
               {term}

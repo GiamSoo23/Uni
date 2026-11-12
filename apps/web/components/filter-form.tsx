@@ -60,7 +60,7 @@ export function FilterForm({ params, terms }: { params: ViewParams; terms: strin
       </Field>
       <Field label="Eligibility">
         <select name="eligible" defaultValue={params.eligible} className={fieldClass}>
-          <option value="hide">Hide no sponsorship or citizenship required</option>
+          <option value="hide">Hide roles closed to international students</option>
           <option value="show">Show all</option>
         </select>
       </Field>
