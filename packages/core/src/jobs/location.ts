@@ -110,18 +110,18 @@ const US_STATE_NAMES = new Set([
   'puerto rico',
 ])
 
-/** Abreviaturas de ciudades que Simplify usa sin estado. */
+/** City abbreviations that Simplify uses without a state. */
 const US_CITY_ALIASES = new Set(['nyc', 'sf', 'la', 'south sf'])
 
 const US_COUNTRY = /^(usa|us|u\.s\.a?\.?|united states( of america)?)$/i
 const REMOTE_US = /^remote(\s*(in|-|,)?\s*(the\s+)?(usa|us|united states))?$/i
 
 /**
- * Indica si una ubicación de Simplify está en EE. UU.
+ * Whether a Simplify location is in the US.
  *
- * Reconoce "City, ST", nombres de estado, "United States", "Remote in USA",
- * "Remote" a secas y alias como "NYC" o "SF". Cualquier ubicación que termine
- * en otro país ("Toronto, ON, Canada", "Remote in UK") devuelve false.
+ * Recognizes "City, ST", state names, "United States", "Remote in USA",
+ * plain "Remote" and aliases like "NYC" or "SF". Any location that ends in
+ * another country ("Toronto, ON, Canada", "Remote in UK") returns false.
  */
 export function isUSLocation(location: string): boolean {
   const value = location.trim()
@@ -136,7 +136,7 @@ export function isUSLocation(location: string): boolean {
   const parts = value.split(',').map((part) => part.trim())
   const last = parts.at(-1) ?? ''
   if (parts.length >= 2 && US_COUNTRY.test(last)) return true
-  // "City, ST" y también "Arlington County, Arlington, VA". Canadá y UK terminan en el país.
+  // "City, ST", and also "Arlington County, Arlington, VA". Canada and the UK end with the country.
   if (parts.length >= 2 && US_STATE_CODES.has(last)) return true
   if (parts.length === 2 && US_STATE_NAMES.has(last.toLowerCase())) return true
   return false

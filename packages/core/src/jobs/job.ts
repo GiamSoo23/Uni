@@ -1,7 +1,7 @@
-/** Qué dice la fuente sobre el patrocinio de visa. */
+/** What the source says about visa sponsorship. */
 export type Sponsorship = 'offers' | 'does_not_offer' | 'citizenship_required' | 'unknown'
 
-/** Categorías canónicas. Simplify usa nombres distintos para la misma categoría. */
+/** Canonical categories. Simplify uses different names for the same category. */
 export const CATEGORIES = [
   'Software',
   'AI/ML/Data',
@@ -12,22 +12,22 @@ export const CATEGORIES = [
 ] as const
 export type Category = (typeof CATEGORIES)[number]
 
-/** Oferta normalizada, independiente de la fuente. */
+/** A normalized job posting, independent of its source. */
 export interface Job {
-  /** ID estable dentro de la fuente. */
+  /** Stable ID within the source. */
   id: string
   source: 'simplify'
   company: string
   title: string
-  /** Link directo para aplicar. Siempre http(s). */
+  /** Direct link to apply. Always http(s). */
   url: string
   locations: string[]
-  /** Temporadas, por ejemplo "Summer 2027". */
+  /** Terms, for example "Summer 2027". */
   terms: string[]
   category: Category
   sponsorship: Sponsorship
   degrees: string[]
-  /** Activa y visible en la fuente. */
+  /** Active and visible in the source. */
   active: boolean
   postedAt: Date
   updatedAt: Date | null

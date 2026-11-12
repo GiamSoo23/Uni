@@ -8,58 +8,58 @@ const ids = (filters: Partial<JobFilters>, jobs = sample) =>
 
 const sample = [
   job({ id: 'swe', postedAt: new Date('2026-11-10T00:00:00Z') }),
-  job({ id: 'cerrada', active: false }),
-  job({ id: 'otra-temporada', terms: ['Fall 2026'] }),
+  job({ id: 'closed', active: false }),
+  job({ id: 'other-term', terms: ['Fall 2026'] }),
   job({ id: 'hardware', category: 'Hardware' }),
   job({ id: 'canada', locations: ['Toronto, ON, Canada'] }),
-  job({ id: 'mixta', locations: ['Toronto, ON, Canada', 'Austin, TX'] }),
-  job({ id: 'sin-sponsor', sponsorship: 'does_not_offer' }),
-  job({ id: 'ciudadania', sponsorship: 'citizenship_required' }),
-  job({ id: 'vieja', postedAt: new Date('2026-09-01T00:00:00Z') }),
+  job({ id: 'mixed', locations: ['Toronto, ON, Canada', 'Austin, TX'] }),
+  job({ id: 'no-sponsorship', sponsorship: 'does_not_offer' }),
+  job({ id: 'citizenship', sponsorship: 'citizenship_required' }),
+  job({ id: 'old', postedAt: new Date('2026-09-01T00:00:00Z') }),
 ]
 
 describe('filterJobs', () => {
-  it('con los filtros por defecto deja solo SWE Summer 2027 en EE. UU. y elegibles', () => {
-    expect(ids({})).toEqual(['swe', 'mixta', 'vieja'])
+  it('the default filters keep only eligible US Software roles for Summer 2027', () => {
+    expect(ids({})).toEqual(['swe', 'mixed', 'old'])
   })
 
-  it('nunca muestra ofertas inactivas', () => {
+  it('never shows inactive roles', () => {
     expect(ids({ term: null, categories: [], region: 'any', hideIneligible: false })).not.toContain(
-      'cerrada',
+      'closed',
     )
   })
 
-  it('muestra ofertas no elegibles si se desactiva el filtro', () => {
+  it('shows ineligible roles when that filter is off', () => {
     expect(ids({ hideIneligible: false })).toEqual(
-      expect.arrayContaining(['sin-sponsor', 'ciudadania']),
+      expect.arrayContaining(['no-sponsorship', 'citizenship']),
     )
   })
 
-  it('incluye otras regiones con region "any"', () => {
+  it('includes other regions with region "any"', () => {
     expect(ids({ region: 'any' })).toContain('canada')
   })
 
-  it('filtra por fecha de publicación', () => {
+  it('filters by posting date', () => {
     expect(ids({ postedWithinDays: 7 })).toEqual(['swe'])
   })
 
-  it('busca en empresa y título sin distinguir mayúsculas', () => {
+  it('searches company and title, ignoring case', () => {
     const jobs = [job({ id: 'a', company: 'NVIDIA' }), job({ id: 'b', title: 'Backend Intern' })]
     expect(ids({ query: 'nvidia' }, jobs)).toEqual(['a'])
     expect(ids({ query: '  BACKEND ' }, jobs)).toEqual(['b'])
   })
 
-  it('ordena de la más reciente a la más antigua', () => {
+  it('sorts from newest to oldest', () => {
     const jobs = [
-      job({ id: 'antigua', postedAt: new Date('2026-10-01T00:00:00Z') }),
-      job({ id: 'nueva', postedAt: new Date('2026-11-05T00:00:00Z') }),
+      job({ id: 'older', postedAt: new Date('2026-10-01T00:00:00Z') }),
+      job({ id: 'newer', postedAt: new Date('2026-11-05T00:00:00Z') }),
     ]
-    expect(ids({}, jobs)).toEqual(['nueva', 'antigua'])
+    expect(ids({}, jobs)).toEqual(['newer', 'older'])
   })
 })
 
 describe('availableTerms', () => {
-  it('cuenta solo ofertas activas, omite N/A y ordena por frecuencia', () => {
+  it('counts only active roles, skips N/A and sorts by frequency', () => {
     const jobs = [
       job({ terms: ['Summer 2027'] }),
       job({ terms: ['Summer 2027', 'Fall 2027'] }),

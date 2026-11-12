@@ -4,16 +4,16 @@ import { isUSLocation } from './location'
 export type Region = 'us' | 'any'
 
 export interface JobFilters {
-  /** Temporada exacta, por ejemplo "Summer 2027". null para todas. */
+  /** Exact term, for example "Summer 2027". null for every term. */
   term: string | null
-  /** Categorías aceptadas. Vacío significa todas. */
+  /** Accepted categories. Empty means all of them. */
   categories: readonly Category[]
   region: Region
-  /** Oculta ofertas donde la fuente dice que no patrocinan o piden ciudadanía. */
+  /** Hides roles where the source says there is no sponsorship or citizenship is required. */
   hideIneligible: boolean
-  /** Solo ofertas publicadas en los últimos N días. null para cualquier fecha. */
+  /** Only roles posted in the last N days. null for any date. */
   postedWithinDays: number | null
-  /** Texto libre que se busca en empresa y título. */
+  /** Free text matched against company and title. */
   query: string
 }
 
@@ -32,7 +32,7 @@ export function isIneligible(job: Job): boolean {
   return job.sponsorship === 'does_not_offer' || job.sponsorship === 'citizenship_required'
 }
 
-/** Aplica los filtros duros y ordena de la más reciente a la más antigua. */
+/** Applies the hard filters and sorts from newest to oldest. */
 export function filterJobs(jobs: readonly Job[], filters: JobFilters, now = new Date()): Job[] {
   const query = filters.query.trim().toLowerCase()
   const since =
@@ -58,7 +58,7 @@ export function filterJobs(jobs: readonly Job[], filters: JobFilters, now = new 
     )
 }
 
-/** Temporadas presentes en las ofertas activas, de la más común a la menos común. */
+/** Terms found in active roles, from most to least common. */
 export function availableTerms(jobs: readonly Job[]): string[] {
   const counts = new Map<string, number>()
   for (const job of jobs) {
