@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { FilterForm } from '@/components/filter-form'
 import { JobCard } from '@/components/job-card'
+import { Logo } from '@/components/logo'
 import { formatDateTime } from '@/lib/format'
 import { getListings, syncIntervalHours } from '@/lib/jobs'
 import {
@@ -109,7 +110,10 @@ function Shell({ children }: { children: ReactNode }) {
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
       <header className="space-y-1">
-        <h1 className="text-2xl font-bold">Uni</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-bold">
+          <Logo className="h-8 w-8 dark:brightness-150" />
+          Uni
+        </h1>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
           Open internships, filtered by eligibility, with a direct link to apply.
         </p>
