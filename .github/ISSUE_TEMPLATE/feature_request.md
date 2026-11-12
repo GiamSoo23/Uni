@@ -1,11 +1,11 @@
 ---
-name: Idea o mejora
-about: Propón algo que Uni no hace hoy
+name: Feature request
+about: Suggest something Uni can't do today
 labels: type:feature
 ---
 
-**¿Qué quieres hacer que Uni no permite hoy?**
+**What do you want to do that Uni can't do today?**
 
-**¿Cómo te gustaría que funcionara?**
+**How would you like it to work?**
 
-Cada persona corre su propia instancia con sus propias llaves, así que las ideas deben encajar con eso.
+Each person runs their own instance with their own keys, so ideas need to fit that.

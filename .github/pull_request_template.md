@@ -1,13 +1,13 @@
 Closes #
 
-**Qué cambia**
+**What changes**
 
-**Cómo lo probé**
+**How it was tested**
 
-- [ ] El CI está en verde
-- [ ] Probé el cambio en la web (`npm run dev`), si toca la interfaz
+- [ ] CI is green
+- [ ] Tried the change in the browser (`npm run dev`), if it touches the interface
 
-**Si aplica**
+**If it applies**
 
-- [ ] `CHANGELOG.md` está actualizado
-- [ ] No subí secretos, datos de mi Sheet ni mi resume
+- [ ] `CHANGELOG.md` is updated
+- [ ] No secrets, Sheet data or resume committed
