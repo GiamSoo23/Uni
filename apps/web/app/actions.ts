@@ -9,13 +9,13 @@ export interface SyncState {
 }
 
 const STATUS_MESSAGES = {
-  downloaded: 'Listo: se descargó una versión nueva.',
-  not_modified: 'Listo: no hubo cambios desde la última sincronización.',
-  cache: 'Listo.',
-  stale: 'No se pudo conectar con GitHub. Se muestra la última copia guardada.',
+  downloaded: 'Done: downloaded a new version.',
+  not_modified: 'Done: nothing changed since the last sync.',
+  cache: 'Done.',
+  stale: 'Couldn’t reach GitHub. Showing the last saved copy.',
 } as const
 
-/** Botón "Sync ahora": ignora la edad de la copia local y consulta a GitHub. */
+/** The "Sync now" button: ignores the age of the local copy and asks GitHub. */
 export async function syncNow(previous: SyncState | null): Promise<SyncState> {
   void previous
   try {
@@ -23,7 +23,7 @@ export async function syncNow(previous: SyncState | null): Promise<SyncState> {
     revalidatePath('/')
     return { ok: result.status !== 'stale', message: STATUS_MESSAGES[result.status] }
   } catch (error) {
-    console.error('Sync ahora falló', error)
-    return { ok: false, message: 'La sincronización falló. Revisa la consola del servidor.' }
+    console.error('Sync now failed', error)
+    return { ok: false, message: 'The sync failed. Check the server logs.' }
   }
 }

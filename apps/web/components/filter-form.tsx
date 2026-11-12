@@ -15,26 +15,26 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-/** Formulario GET: los filtros viven en la URL y funcionan sin JavaScript. */
+/** A GET form: the filters live in the URL and work without JavaScript. */
 export function FilterForm({ params, terms }: { params: ViewParams; terms: string[] }) {
   const termOptions =
     terms.includes(params.term) || params.term === 'all' ? terms : [params.term, ...terms]
 
   return (
     <form method="get" action="/" className="flex flex-wrap items-end gap-3">
-      <Field label="Buscar">
+      <Field label="Search">
         <input
           type="search"
           name="q"
           defaultValue={params.q}
-          placeholder="Empresa o título"
+          placeholder="Company or title"
           maxLength={100}
           className={`${fieldClass} w-56`}
         />
       </Field>
-      <Field label="Temporada">
+      <Field label="Term">
         <select name="term" defaultValue={params.term} className={fieldClass}>
-          <option value="all">Todas</option>
+          <option value="all">All</option>
           {termOptions.map((term) => (
             <option key={term} value={term}>
               {term}
@@ -42,9 +42,9 @@ export function FilterForm({ params, terms }: { params: ViewParams; terms: strin
           ))}
         </select>
       </Field>
-      <Field label="Categoría">
+      <Field label="Category">
         <select name="category" defaultValue={params.category} className={fieldClass}>
-          <option value="all">Todas</option>
+          <option value="all">All</option>
           {CATEGORIES.map((category) => (
             <option key={category} value={category}>
               {category}
@@ -52,38 +52,38 @@ export function FilterForm({ params, terms }: { params: ViewParams; terms: strin
           ))}
         </select>
       </Field>
-      <Field label="Región">
+      <Field label="Region">
         <select name="region" defaultValue={params.region} className={fieldClass}>
-          <option value="us">EE. UU. y remoto US</option>
-          <option value="any">Cualquiera</option>
+          <option value="us">US and US remote</option>
+          <option value="any">Anywhere</option>
         </select>
       </Field>
-      <Field label="Elegibilidad">
+      <Field label="Eligibility">
         <select name="eligible" defaultValue={params.eligible} className={fieldClass}>
-          <option value="hide">Ocultar sin sponsorship o con ciudadanía</option>
-          <option value="show">Mostrar todas</option>
+          <option value="hide">Hide no sponsorship or citizenship required</option>
+          <option value="show">Show all</option>
         </select>
       </Field>
-      <Field label="Publicada">
+      <Field label="Posted">
         <select name="days" defaultValue={params.days} className={fieldClass}>
-          <option value="all">Cualquier fecha</option>
-          <option value="3">Últimos 3 días</option>
-          <option value="7">Última semana</option>
-          <option value="14">Últimas 2 semanas</option>
-          <option value="30">Último mes</option>
+          <option value="all">Any time</option>
+          <option value="3">Last 3 days</option>
+          <option value="7">Last week</option>
+          <option value="14">Last 2 weeks</option>
+          <option value="30">Last month</option>
         </select>
       </Field>
       <button
         type="submit"
         className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
       >
-        Filtrar
+        Filter
       </button>
       <Link
         href="/"
         className="py-1.5 text-sm text-zinc-500 underline hover:text-zinc-800 dark:hover:text-zinc-200"
       >
-        Restablecer
+        Reset
       </Link>
     </form>
   )

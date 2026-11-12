@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // @uni/core se publica como TypeScript sin compilar dentro del monorepo.
+  // @uni/core ships as uncompiled TypeScript inside the monorepo.
   transpilePackages: ['@uni/core'],
 }
 

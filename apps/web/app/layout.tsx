@@ -4,12 +4,12 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Uni',
-  description: 'Internships abiertas, filtradas por elegibilidad, con link directo para aplicar.',
+  description: 'Open internships, filtered by eligibility, with a direct link to apply.',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="en">
       <body className="min-h-screen font-sans">{children}</body>
     </html>
   )
