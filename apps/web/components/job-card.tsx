@@ -40,7 +40,7 @@ export function JobCard({ job, now }: { job: Job; now: Date }) {
       </div>
       <div className="flex shrink-0 items-center gap-4 sm:flex-col sm:items-end sm:gap-2">
         <span className="text-xs text-zinc-500 dark:text-zinc-400">
-          Publicada {daysAgo(job.postedAt, now)}
+          Posted {daysAgo(job.postedAt, now)}
         </span>
         <a
           href={job.url}
@@ -48,7 +48,7 @@ export function JobCard({ job, now }: { job: Job; now: Date }) {
           rel="noopener noreferrer"
           className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500"
         >
-          Aplicar ↗
+          Apply ↗
         </a>
       </div>
     </li>

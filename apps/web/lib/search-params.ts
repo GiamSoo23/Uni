@@ -6,8 +6,8 @@ export const PAGE_SIZE = 50
 export type RawSearchParams = Record<string, string | string[] | undefined>
 
 /**
- * Los query params vienen del navegador: se validan aquí y cualquier valor
- * inválido vuelve al valor por defecto en lugar de romper la página.
+ * Query params come from the browser: they're validated here, and any invalid
+ * value falls back to its default instead of breaking the page.
  */
 const searchParamsSchema = z.object({
   q: z.string().trim().max(100).catch(''),
@@ -44,7 +44,7 @@ export function toJobFilters(params: ViewParams): JobFilters {
   }
 }
 
-/** URL de la misma vista con algunos parámetros cambiados (para la paginación). */
+/** URL of the same view with some params changed (for pagination). */
 export function hrefWith(params: ViewParams, changes: Partial<ViewParams>): string {
   const next = { ...params, ...changes }
   const query = new URLSearchParams()

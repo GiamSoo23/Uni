@@ -21,12 +21,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
   try {
     listings = await getListings()
   } catch (error) {
-    console.error('No se pudieron cargar las ofertas', error)
+    console.error('Could not load the listings', error)
     return (
       <Shell>
         <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
-          No se pudieron descargar las ofertas de Simplify y no hay copia local. Revisa tu conexión
-          y presiona “Sync ahora”.
+          Couldn’t download the Simplify listings, and there’s no local copy. Check your connection
+          and press “Sync now”.
         </div>
         <SyncButton />
       </Shell>
@@ -44,33 +44,28 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
     <Shell>
       <section className="flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-600 dark:text-zinc-400">
         <p>
-          <strong className="text-zinc-900 dark:text-zinc-100">{filtered.length}</strong> roles con
-          estos filtros, de {activeCount.toLocaleString('es')} activos en Simplify. Última
-          sincronización: {formatDateTime(listings.fetchedAt)}. Se actualiza cada{' '}
-          {syncIntervalHours % 24 === 0
-            ? `${syncIntervalHours / 24} días`
-            : `${syncIntervalHours} h`}
-          .
+          <strong className="text-zinc-900 dark:text-zinc-100">{filtered.length}</strong> roles
+          match these filters, out of {activeCount.toLocaleString('en')} active on Simplify. Last
+          sync: {formatDateTime(listings.fetchedAt)}. Refreshes every {syncInterval()}.
         </p>
         <SyncButton />
       </section>
 
       {listings.status === 'stale' && (
         <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200">
-          No se pudo actualizar desde GitHub ({listings.error}). Se muestra la última copia
-          guardada.
+          Couldn’t refresh from GitHub ({listings.error}). Showing the last saved copy.
         </p>
       )}
       {listings.invalid > 0 && (
         <p className="text-xs text-zinc-500">
-          {listings.invalid} registros de Simplify no cumplieron el esquema y se omitieron.
+          {listings.invalid} Simplify records didn’t match the schema and were skipped.
         </p>
       )}
 
       <FilterForm params={params} terms={availableTerms(listings.jobs)} />
 
       {visible.length === 0 ? (
-        <p className="py-12 text-center text-zinc-500">Ningún rol coincide con estos filtros.</p>
+        <p className="py-12 text-center text-zinc-500">No roles match these filters.</p>
       ) : (
         <ul className="space-y-3">
           {visible.map((job) => (
@@ -80,28 +75,34 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
       )}
 
       {pageCount > 1 && (
-        <nav className="flex items-center justify-center gap-4 text-sm" aria-label="Paginación">
+        <nav className="flex items-center justify-center gap-4 text-sm" aria-label="Pagination">
           {page > 1 ? (
             <Link href={hrefWith(params, { page: page - 1 })} className="underline">
-              ← Anterior
+              ← Previous
             </Link>
           ) : (
-            <span className="text-zinc-400">← Anterior</span>
+            <span className="text-zinc-400">← Previous</span>
           )}
           <span>
-            Página {page} de {pageCount}
+            Page {page} of {pageCount}
           </span>
           {page < pageCount ? (
             <Link href={hrefWith(params, { page: page + 1 })} className="underline">
-              Siguiente →
+              Next →
             </Link>
           ) : (
-            <span className="text-zinc-400">Siguiente →</span>
+            <span className="text-zinc-400">Next →</span>
           )}
         </nav>
       )}
     </Shell>
   )
+}
+
+function syncInterval(): string {
+  if (syncIntervalHours % 24 !== 0) return `${syncIntervalHours} h`
+  const days = syncIntervalHours / 24
+  return days === 1 ? 'day' : `${days} days`
 }
 
 function Shell({ children }: { children: ReactNode }) {
@@ -110,12 +111,12 @@ function Shell({ children }: { children: ReactNode }) {
       <header className="space-y-1">
         <h1 className="text-2xl font-bold">Uni</h1>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Internships abiertas, filtradas por elegibilidad, con link directo para aplicar.
+          Open internships, filtered by eligibility, with a direct link to apply.
         </p>
       </header>
       {children}
       <footer className="border-t border-zinc-200 pt-4 text-xs text-zinc-500 dark:border-zinc-800">
-        Datos de{' '}
+        Data from{' '}
         <a
           href="https://github.com/SimplifyJobs/Summer2027-Internships"
           target="_blank"
@@ -124,7 +125,7 @@ function Shell({ children }: { children: ReactNode }) {
         >
           SimplifyJobs/Summer2027-Internships
         </a>
-        , mantenido por Simplify y Pitt CSC.
+        , maintained by Simplify and Pitt CSC.
       </footer>
     </main>
   )

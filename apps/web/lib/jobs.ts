@@ -3,7 +3,7 @@ import path from 'node:path'
 import { syncSimplifyListings, type SyncResult } from '@uni/core'
 
 const HOUR_MS = 60 * 60 * 1000
-/** Tras un fallo de red, cuánto esperar antes de reintentar con cada visita. */
+/** After a network failure, how long to wait before retrying on each visit. */
 const STALE_RETRY_MS = 10 * 60 * 1000
 
 function readMaxAgeMs(): number {
@@ -12,8 +12,8 @@ function readMaxAgeMs(): number {
 }
 
 /**
- * En Vercel solo `/tmp` se puede escribir, y se vacía cuando la instancia se
- * recicla: una instancia nueva vuelve a descargar los datos una vez.
+ * On Vercel only `/tmp` is writable, and it's emptied when the instance is
+ * recycled: a new instance downloads the data once more.
  */
 function defaultCacheDir(): string {
   if (process.env.VERCEL === '1') return '/tmp/uni-cache'
@@ -33,9 +33,9 @@ function memoIsFresh(now: number): boolean {
 }
 
 /**
- * Ofertas de Simplify. Por defecto se refrescan una vez por semana
- * (UNI_SYNC_MAX_AGE_HOURS). `force` es el botón "Sync ahora".
- * El resultado se guarda en memoria para no parsear ~10 MB en cada visita.
+ * Simplify listings. By default they refresh once a week
+ * (UNI_SYNC_MAX_AGE_HOURS). `force` is the "Sync now" button.
+ * The result is kept in memory so ~13 MB isn't parsed on every visit.
  */
 export async function getListings({ force = false } = {}): Promise<SyncResult> {
   if (!force && memoIsFresh(Date.now()) && memo !== null) return memo.result
