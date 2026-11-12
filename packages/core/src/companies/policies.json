@@ -1,0 +1,100 @@
+[
+  {
+    "company": "Anduril",
+    "aliases": ["Anduril Industries"],
+    "policy": "us_person_required",
+    "source": "posting",
+    "note": "2 of 3 sampled Summer 2027 Software postings require U.S. person status.",
+    "evidence": [
+      {
+        "quote": "Must be a U.S. Person due to required access to U.S. export-controlled information or facilities",
+        "url": "https://boards.greenhouse.io/andurilindustries/jobs/5148079007",
+        "checkedAt": "2026-11-12"
+      }
+    ]
+  },
+  {
+    "company": "Booz Allen",
+    "aliases": ["Booz Allen Hamilton"],
+    "policy": "clearance_required",
+    "source": "posting",
+    "note": "4 of 4 sampled Summer 2027 Software postings require the ability to obtain a Secret clearance, which needs U.S. citizenship.",
+    "evidence": [
+      {
+        "quote": "Ability to obtain a Secret clearance",
+        "url": "https://bah.wd1.myworkdayjobs.com/bah_jobs/job/El-Segundo-CA/University---2027-Summer-Games-Software-Developer-Intern---El-Segundo--CA_R0248046",
+        "checkedAt": "2026-11-12"
+      }
+    ]
+  },
+  {
+    "company": "CACI",
+    "aliases": ["CACI International"],
+    "policy": "no_sponsorship",
+    "source": "posting",
+    "note": "4 of 4 sampled Summer 2027 Software postings rule out sponsorship now or later, require U.S. citizenship, or require a TS/SCI clearance.",
+    "evidence": [
+      {
+        "quote": "Must be legally authorized to work in the United States without the need for employer sponsorship, now or at any time in the future",
+        "url": "https://caci.wd1.myworkdayjobs.com/external/job/Omaha-NE-US/Software-Engineer-Intern---Summer-2027_332776",
+        "checkedAt": "2026-11-12"
+      }
+    ]
+  },
+  {
+    "company": "General Dynamics Information Technology",
+    "aliases": ["GDIT"],
+    "policy": "no_sponsorship",
+    "source": "posting",
+    "note": "4 of 4 sampled Summer 2027 postings say sponsorship isn't available, while also saying U.S. citizenship isn't required.",
+    "evidence": [
+      {
+        "quote": "Sponsorship is not available for this role",
+        "url": "https://gdit.wd5.myworkdayjobs.com/gdit_earlytalent/job/USA-LA-Bossier-City/GDIT-Summer-Internship-Program---Summer-2027-Software-Development-Internship_RQ228931-2",
+        "checkedAt": "2026-11-12"
+      }
+    ]
+  },
+  {
+    "company": "General Dynamics Mission Systems",
+    "aliases": ["GDMS"],
+    "policy": "citizenship_required",
+    "source": "posting",
+    "note": "4 of 4 sampled Summer 2027 Software postings require U.S. citizenship.",
+    "evidence": [
+      {
+        "quote": "Due to the nature of work performed within our facilities, U.S. citizenship is required",
+        "url": "https://careers-gdms.icims.com/jobs/75131/job",
+        "checkedAt": "2026-11-12"
+      }
+    ]
+  },
+  {
+    "company": "Northrop Grumman",
+    "aliases": [],
+    "policy": "clearance_required",
+    "source": "posting",
+    "note": "2 of 2 sampled Summer 2027 Software postings require the ability to obtain a U.S. government security clearance.",
+    "evidence": [
+      {
+        "quote": "Be able to obtain and maintain a U.S. Government security clearance (U.S. citizenship is a pre-requisite)",
+        "url": "https://ngc.wd1.myworkdayjobs.com/Northrop_Grumman_External_Site/job/United-States-Colorado-Colorado-Springs/XMLNAME-2027-Software-Engineering-Intern---Colorado-Springs_R10256259",
+        "checkedAt": "2026-11-12"
+      }
+    ]
+  },
+  {
+    "company": "RTX",
+    "aliases": ["Raytheon", "Collins Aerospace", "Pratt & Whitney"],
+    "policy": "us_person_required",
+    "source": "posting",
+    "note": "4 of 4 sampled Summer 2027 postings require U.S. person status, and 2 of them require U.S. citizenship.",
+    "evidence": [
+      {
+        "quote": "U.S. citizenship is required, as only U.S. citizens are eligible for a security clearance",
+        "url": "https://globalhr.wd5.myworkdayjobs.com/rec_rtx_ext_gateway/job/US-TX-RICHARDSON-C17--1717-Cityline-Dr--CITYLINE-C17/Software-Engineering-Intern--Summer-2027-_01888049",
+        "checkedAt": "2026-11-12"
+      }
+    ]
+  }
+]
