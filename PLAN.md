@@ -55,12 +55,12 @@ Each phase is a GitHub milestone with its issues. Work lands through a branch an
 | --------- | ----------------------------------------------------------------------------------------- | ----- | ----------- |
 | M0        | Foundation: monorepo, strict TS, lint, Vitest, gitleaks, CI, labels and milestones        | 3-4   | Done        |
 | M1        | Simplify source and job inbox: ETag cache, Zod, filters, Sync now                         | 6-8   | Done        |
-| M2        | Private deployment: Vercel with Vercel Authentication on every deployment                 | 1-2   | In progress |
+| M2        | Private deployment: Vercel with Vercel Authentication on every deployment                 | 1-2   | Done        |
 | M3        | Google Sheets: service account, hyperlinks, Mark as applied, `Job ID`, hide applied roles | 6-8   |             |
 | M4        | Full inbox: Not interested (Postgres + Prisma), states                                    | 6-8   |             |
 | M5        | Profile from the resume with Claude, eligibility, own key                                 | 5-6   |             |
 | M6        | Evaluation: descriptions per ATS, sponsorship with a quote, score, cache, Batch           | 8-10  |             |
-| M7        | Company signals: Sheet notes and the H-1B CSV                                             | 4-5   |             |
+| M7        | Company signals: a sourced policy list (pulled forward), Sheet notes and the H-1B CSV     | 4-5   | In progress |
 | M8        | Companies: portals derived from the links, top 100-150, Companies tab, watching NO ROLE   | 6-8   |             |
 | M9        | AWS with CDK: weekly Scheduler, Lambda, SQS, DLQ, Budgets, OIDC                           | 10-12 |             |
 | M10       | Alerts: weekly digest through a Discord webhook                                           | 3-4   |             |

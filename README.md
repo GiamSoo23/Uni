@@ -2,16 +2,25 @@
 
 Uni puts open internships on one page, hides the ones that don't accept international students, and links straight to each application.
 
-> Status: M2. The job inbox works locally with Simplify data and deploys privately to Vercel. Google Sheets sync and Claude evaluation come next. The plan is in [PLAN.md](PLAN.md) and progress is tracked in the [milestones](https://github.com/GiamSoo23/Uni/milestones).
+> Status: M2 done, part of M7 pulled forward. The job inbox runs privately on Vercel and hides roles from companies that rule out international students. Google Sheets sync and Claude evaluation come next. The plan is in [PLAN.md](PLAN.md) and progress is tracked in the [milestones](https://github.com/GiamSoo23/Uni/milestones).
 
 ## What it does today
 
 - Downloads `listings.json` from [SimplifyJobs/Summer2027-Internships](https://github.com/SimplifyJobs/Summer2027-Internships). It refreshes once a week or when you press **Sync now**, and uses an ETag so it doesn't download ~13 MB again when nothing changed.
 - Validates every record with Zod and drops the ones that don't match the schema. If a download fails, it keeps showing the last good copy.
 - Filters by term, category, region (US and US remote), posting date and text.
-- Hides roles where Simplify says "Does Not Offer Sponsorship" or "U.S. Citizenship is Required".
+- Hides roles international students can't apply to, and labels every role with where that answer comes from.
 
-Simplify marks almost every role as "Other" for sponsorship, so today that filter removes few roles. Milestone M6 adds reading each job description with Claude.
+## How eligibility is decided
+
+Simplify marks almost every role as "Other" for sponsorship, so its flag alone hides very few roles. Uni checks two sources, in this order:
+
+1. **Simplify's flag for the role:** "Does Not Offer Sponsorship", "U.S. Citizenship is Required" or "Offers Sponsorship".
+2. **The company's policy**, from a [sourced list](packages/core/src/companies/policies.json): `accepts`, `no_sponsorship`, `us_person_required`, `citizenship_required` or `clearance_required`. Each entry quotes a current posting, with its URL and the date it was checked.
+
+If neither says anything, the role shows **Eligibility not verified**: nobody has checked it yet, which doesn't mean it accepts international students. On Nov 12, 2026, the company list hid 52 of the 721 Software roles for Summer 2027 in the US, from defense contractors that require U.S. citizenship, U.S. person status or a security clearance.
+
+Your own Google Sheet will be able to override the list (M3), and Claude will read each job description (M6). To add a company, see [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-company-policy).
 
 ## Requirements
 

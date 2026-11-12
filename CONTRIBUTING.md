@@ -51,6 +51,20 @@ A local hook (husky) checks the message when you commit, and CI checks every com
 | Formatting                      | `npm run format:check` |
 | Build                           | `npm run build`        |
 
+## Adding a company policy
+
+[`packages/core/src/companies/policies.json`](packages/core/src/companies/policies.json) lists companies whose internships international students can or can't apply to. The inbox hides roles from companies that rule them out, so every entry has to be backed by evidence.
+
+- **Policy:** `accepts`, `no_sponsorship`, `us_person_required`, `citizenship_required` or `clearance_required`.
+- **Source:** `posting` for entries in this list. Personal knowledge, such as what a recruiter told you, belongs in your own Google Sheet instead.
+- **Evidence:** a short, verbatim quote from a current posting, its URL and the date you checked it (`YYYY-MM-DD`).
+- **Note:** how many current postings you checked and how many say the same thing, for example "4 of 4 sampled Summer 2027 Software postings".
+- **Aliases:** other names the company uses in Simplify, so the match doesn't miss them.
+
+A policy applies to the whole company, so only add one when most of the company's current internships say the same thing. If a posting says something different, Simplify's flag for that role still wins.
+
+`npm test` validates the file: an entry without evidence, with a bad date or with a duplicate name fails.
+
 ## Secrets and personal data
 
 Never commit keys, passwords, a filled-in `.env`, your resume or data from your Sheet. gitleaks scans the full history in CI. Use made-up data in tests.
