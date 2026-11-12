@@ -10,26 +10,26 @@ de GitHub e incluye cómo reproducir el problema. Uni lo mantiene una sola perso
 
 ## Que el repo sea público no da acceso a tu app
 
-- **El código es público, tus llaves no.** Las llaves y credenciales viven en `apps/web/.env.local` en tu máquina. `.gitignore` las excluye y gitleaks revisa todo el historial en cada pull request.
-- **La app solo escucha en tu computadora.** `npm run dev` y `npm start` usan `127.0.0.1`, así que nadie en tu misma red Wi-Fi puede abrirla.
+- **El código es público, tus llaves no.** En local viven en `apps/web/.env.local`, y en Vercel en las variables de entorno del proyecto. `.gitignore` las excluye y gitleaks revisa todo el historial en cada pull request.
+- **En línea, solo entra el dueño.** El deployment en Vercel usa Vercel Authentication en **todos** los deployments, incluido producción. Quien no inicie sesión con una cuenta con acceso al proyecto no llega a la app ni a "Sync ahora". Ver [docs/DEPLOY.md](docs/DEPLOY.md).
+- **En local, solo tu computadora.** `npm run dev` y `npm start` usan `127.0.0.1`, así que nadie en tu misma red Wi-Fi puede abrirla.
 - **Los forks no reciben secretos.** GitHub Actions no entrega los secretos del repo a pull requests que vienen de forks, y los workflows no usan `pull_request_target`.
 
 ## Modelo de seguridad
 
-| Activo                             | Dónde vive                       | Cómo se protege                                                                |
-| ---------------------------------- | -------------------------------- | ------------------------------------------------------------------------------ |
-| Datos de Simplify                  | `apps/web/.cache/`               | Datos públicos. Se validan con Zod y los links que no son http(s) se descartan |
-| Llave de Claude (fase 4)           | `.env.local`                     | Solo la lee el servidor. Nunca llega al navegador ni a los logs                |
-| Service account de Google (fase 2) | Un JSON fuera del repo           | Solo tiene acceso al Sheet que compartes con ella                              |
-| Tu resume y tu Sheet               | Tu máquina y tu cuenta de Google | Nunca entran al repo                                                           |
+| Activo                         | Dónde vive                                 | Cómo se protege                                                                |
+| ------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------ |
+| Datos de Simplify              | `apps/web/.cache/` o `/tmp` en Vercel      | Datos públicos. Se validan con Zod y los links que no son http(s) se descartan |
+| La app en línea                | Vercel                                     | Vercel Authentication en todos los deployments                                 |
+| Llave de Claude (M5)           | `.env.local` o variables de entorno Vercel | Solo la lee el servidor. Nunca llega al navegador ni a los logs                |
+| Service account de Google (M3) | Variables de entorno, nunca un archivo     | Solo tiene acceso al Sheet que compartes con ella                              |
+| Tu resume y tu Sheet           | Tu máquina y tu cuenta de Google           | Nunca entran al repo                                                           |
 
-## Antes de publicar la web en internet
+## Antes de gastar dinero (M6)
 
-Hoy la app no tiene login porque solo escucha en `127.0.0.1`. Antes de desplegarla:
-
-- **Login obligatorio**, restringido a una lista de emails permitidos. Cada server action verifica la sesión, incluido "Sync ahora".
 - **Tope de gasto en Claude:** un límite mensual en la consola de Anthropic, más un máximo de llamadas por sync dentro de la app.
-- **Espera mínima entre syncs manuales**, para que nadie pueda dispararlos en bucle.
+- **Espera mínima entre syncs manuales**, como segunda barrera detrás del login.
+- Si la app llega a tener más de un usuario, hará falta un login propio con lista de emails permitidos, verificado en cada server action.
 
 ## Qué se prueba
 

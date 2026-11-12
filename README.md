@@ -2,7 +2,7 @@
 
 Uni reúne las internships abiertas en una sola página, oculta las que no aceptan estudiantes internacionales y te da el link directo para aplicar.
 
-> Estado: fase 1. La bandeja web con datos de Simplify funciona. La sincronización con Google Sheets y la evaluación con Claude vienen después. El plan completo está en [PLAN.md](PLAN.md).
+> Estado: M2. La bandeja web con datos de Simplify funciona en local y se despliega en Vercel de forma privada. La sincronización con Google Sheets y la evaluación con Claude vienen después. El plan está en [PLAN.md](PLAN.md) y el avance en los [milestones](https://github.com/GiamSoo23/Uni/milestones).
 
 ## Qué hace hoy
 
@@ -11,7 +11,7 @@ Uni reúne las internships abiertas en una sola página, oculta las que no acept
 - Filtra por temporada, categoría, región (EE. UU. y remoto US), fecha de publicación y texto.
 - Oculta los roles donde Simplify indica "Does Not Offer Sponsorship" o "U.S. Citizenship is Required".
 
-Simplify marca casi todos los roles como "Other" en sponsorship, así que hoy ese filtro descarta pocos. La fase 5 agrega la lectura de cada descripción con Claude.
+Simplify marca casi todos los roles como "Other" en sponsorship, así que hoy ese filtro descarta pocos. El milestone M6 agrega la lectura de cada descripción con Claude.
 
 ## Requisitos
 
@@ -27,6 +27,10 @@ npm run dev                            # http://127.0.0.1:3000
 ```
 
 La primera visita descarga los datos y tarda unos segundos. La copia queda en `apps/web/.cache/`, que está fuera del repo.
+
+## En línea, solo para ti
+
+Uni se despliega en Vercel (plan Hobby, gratis) con Vercel Authentication en todos los deployments, así que solo entra quien tenga acceso al proyecto en Vercel. Los pasos están en [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Comandos
 
