@@ -4,17 +4,18 @@
 
 ## Decisiones tomadas
 
-| Tema             | Decisión                                                                         |
-| ---------------- | -------------------------------------------------------------------------------- |
-| Nombre           | Uni                                                                              |
-| Forma            | Web app desde el inicio (Next.js). Sin pasos solo de CLI                         |
-| Prioridad        | Descubrir roles abiertos que encajen y acepten internacionales                   |
-| Fuente principal | `listings.json` del repo SimplifyJobs/Summer2027-Internships                     |
-| Frecuencia       | Sync automático semanal, más el botón "Sync ahora"                               |
-| Google Sheet     | La app puede modificarlo: agrega la columna `Job ID` y crea la pestaña Companies |
-| Acceso a Google  | Service account (el Sheet se comparte con su correo)                             |
-| IA               | Claude con la llave de cada usuario. Modo sin IA disponible                      |
-| Fuera de v1      | Automatizar Handshake o LinkedIn, autocompletar formularios, leer el correo      |
+| Tema             | Decisión                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| Nombre           | Uni                                                                                  |
+| Forma            | Web app desde el inicio (Next.js). Sin pasos solo de CLI                             |
+| Prioridad        | Descubrir roles abiertos que encajen y acepten internacionales                       |
+| Fuente principal | `listings.json` del repo SimplifyJobs/Summer2027-Internships                         |
+| Frecuencia       | Sync automático semanal, más el botón "Sync ahora"                                   |
+| Google Sheet     | La app puede modificarlo: agrega la columna `Job ID` y crea la pestaña Companies     |
+| Acceso a Google  | Service account (el Sheet se comparte con su correo)                                 |
+| En línea         | Vercel Hobby con Vercel Authentication en todos los deployments: solo entra el dueño |
+| IA               | Claude con la llave de cada usuario. Modo sin IA disponible                          |
+| Fuera de v1      | Automatizar Handshake o LinkedIn, autocompletar formularios, leer el correo          |
 
 ## Flujo objetivo
 
@@ -48,19 +49,22 @@ Las ofertas que dicen "no" explícitamente se ocultan. Las que no dicen nada se 
 
 ## Fases (a 4 h por semana)
 
-| #   | Fase                                                                                                | Horas | Estado                                |
-| --- | --------------------------------------------------------------------------------------------------- | ----- | ------------------------------------- |
-| 0   | Base: monorepo, TS estricto, lint, Vitest, gitleaks, CI, labels y milestones                        | 3-4   | Hecho (falta crear el repo en GitHub) |
-| 1   | Fuente Simplify y bandeja web: caché con ETag, Zod, filtros, Sync ahora                             | 6-8   | Hecho                                 |
-| 2   | Google Sheets: service account, hipervínculos, Marcar como aplicado, `Job ID`, ocultar ya aplicados | 6-8   | Siguiente                             |
-| 3   | Bandeja completa: No me interesa (Postgres + Prisma), estados                                       | 6-8   |                                       |
-| 4   | Perfil desde el resume con Claude, elegibilidad, llave propia                                       | 5-6   |                                       |
-| 5   | Evaluación: descripciones por ATS, sponsorship con cita, puntaje, caché, Batch                      | 8-10  |                                       |
-| 6   | Señales de empresa: notas del Sheet y CSV H-1B                                                      | 4-5   |                                       |
-| 7   | Empresas: portales derivados de los links, top 100-150, pestaña Companies, seguimiento de NO ROLE   | 6-8   |                                       |
-| 8   | AWS con CDK: Scheduler semanal, Lambda, SQS, DLQ, Budgets, OIDC                                     | 10-12 |                                       |
-| 9   | Alertas: resumen semanal por webhook a Discord                                                      | 3-4   |                                       |
-| 10  | Open source v0.1: README, ARCHITECTURE.md, guía de adaptadores, Sheet de ejemplo                    | 5-6   |                                       |
+Cada fase es un milestone en GitHub, con sus issues. El trabajo entra por una rama y un pull request que cierra el issue, igual que en Mox.
+
+| Milestone | Fase                                                                                                | Horas | Estado      |
+| --------- | --------------------------------------------------------------------------------------------------- | ----- | ----------- |
+| M0        | Base: monorepo, TS estricto, lint, Vitest, gitleaks, CI, labels y milestones                        | 3-4   | Hecho       |
+| M1        | Fuente Simplify y bandeja web: caché con ETag, Zod, filtros, Sync ahora                             | 6-8   | Hecho       |
+| M2        | En línea, solo para mí: Vercel con Vercel Authentication en todos los deployments                   | 1-2   | En progreso |
+| M3        | Google Sheets: service account, hipervínculos, Marcar como aplicado, `Job ID`, ocultar ya aplicados | 6-8   |             |
+| M4        | Bandeja completa: No me interesa (Postgres + Prisma), estados                                       | 6-8   |             |
+| M5        | Perfil desde el resume con Claude, elegibilidad, llave propia                                       | 5-6   |             |
+| M6        | Evaluación: descripciones por ATS, sponsorship con cita, puntaje, caché, Batch                      | 8-10  |             |
+| M7        | Señales de empresa: notas del Sheet y CSV H-1B                                                      | 4-5   |             |
+| M8        | Empresas: portales derivados de los links, top 100-150, pestaña Companies, seguimiento de NO ROLE   | 6-8   |             |
+| M9        | AWS con CDK: Scheduler semanal, Lambda, SQS, DLQ, Budgets, OIDC                                     | 10-12 |             |
+| M10       | Alertas: resumen semanal por webhook a Discord                                                      | 3-4   |             |
+| M11       | Open source v0.1: README, ARCHITECTURE.md, guía de adaptadores, Sheet de ejemplo                    | 5-6   |             |
 
 ## Costos
 
