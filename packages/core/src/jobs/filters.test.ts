@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { job } from '../test/fixtures'
+import { createPolicyIndex } from '../companies/policy'
+import { job, policy } from '../test/fixtures'
 import { availableTerms, DEFAULT_FILTERS, filterJobs, type JobFilters } from './filters'
 
 const now = new Date('2026-11-11T12:00:00Z')
 const ids = (filters: Partial<JobFilters>, jobs = sample) =>
-  filterJobs(jobs, { ...DEFAULT_FILTERS, ...filters }, now).map((j) => j.id)
+  filterJobs(jobs, { ...DEFAULT_FILTERS, ...filters }, { now }).map((j) => j.id)
 
 const sample = [
   job({ id: 'swe', postedAt: new Date('2026-11-10T00:00:00Z') }),
@@ -33,6 +34,23 @@ describe('filterJobs', () => {
     expect(ids({ hideIneligible: false })).toEqual(
       expect.arrayContaining(['no-sponsorship', 'citizenship']),
     )
+  })
+
+  it('hides roles from companies whose policy rules out international students', () => {
+    const policies = createPolicyIndex([
+      policy({ company: 'Defense Co', policy: 'citizenship_required' }),
+      policy({ company: 'Friendly Bank', policy: 'accepts' }),
+    ])
+    const jobs = [
+      job({ id: 'defense', company: 'Defense Co' }),
+      job({ id: 'bank', company: 'Friendly Bank' }),
+      job({ id: 'other', company: 'Someone Else' }),
+    ]
+    const visible = (hideIneligible: boolean) =>
+      filterJobs(jobs, { ...DEFAULT_FILTERS, hideIneligible }, { now, policies }).map((j) => j.id)
+
+    expect(visible(true).sort()).toEqual(['bank', 'other'])
+    expect(visible(false).sort()).toEqual(['bank', 'defense', 'other'])
   })
 
   it('includes other regions with region "any"', () => {
