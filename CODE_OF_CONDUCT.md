@@ -1,13 +1,13 @@
-# Código de conducta
+# Code of Conduct
 
-Uni debe ser un proyecto acogedor para todos, sin importar su experiencia o su origen.
+Uni should be a welcoming project for everyone, whatever their experience or background.
 
-**Por favor:** sé amable, asume buena intención, comenta sobre el trabajo y no sobre la persona, y acepta los comentarios con buena disposición.
+**Please:** be kind, assume good intent, give feedback about the work and not the person, and accept feedback gracefully.
 
-**No se acepta:** acoso, insultos, discriminación, lenguaje o atención sexual, publicar información privada de otra persona, ni cualquier conducta inapropiada en un entorno profesional.
+**Not acceptable:** harassment, insults, discrimination, sexual language or attention, publishing someone's private information, or any behavior that would be inappropriate in a professional setting.
 
-Esto aplica en issues, pull requests y en cualquier lugar donde representes al proyecto. El mantenedor puede eliminar contenido o bloquear a quien rompa estas reglas.
+This applies to issues, pull requests and anywhere you represent the project. The maintainer may remove content or block people who break these rules.
 
-Para reportar un problema en privado, usa un [reporte privado](https://github.com/GiamSoo23/Uni/security/advisories/new). Es el único canal privado que GitHub ofrece en este repositorio, así que también sirve para temas de conducta.
+To report a problem privately, use a [private report](https://github.com/GiamSoo23/Uni/security/advisories/new). It's the one private channel GitHub offers on this repository, so it's fine to use it for conduct too.
 
-Basado en las ideas del [Contributor Covenant](https://www.contributor-covenant.org/).
+Based on the ideas of the [Contributor Covenant](https://www.contributor-covenant.org/).
