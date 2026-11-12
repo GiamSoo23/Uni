@@ -1,0 +1,9 @@
+node_modules
+.next
+.turbo
+.cache
+dist
+coverage
+package-lock.json
+next-env.d.ts
+PROYECTO_MIGRACION_KIRO.md
