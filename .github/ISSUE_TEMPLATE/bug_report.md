@@ -1,21 +1,21 @@
 ---
-name: Reporte de bug
-about: Algo en Uni no funciona
+name: Bug report
+about: Something in Uni doesn't work
 labels: type:bug
 ---
 
-**¿Qué pasó?**
+**What happened?**
 
-**¿Qué esperabas?**
+**What did you expect?**
 
-**Cómo reproducirlo**
+**How to reproduce it**
 
 1.
 
-**Entorno**
+**Environment**
 
-- Versión o commit de Uni:
-- Sistema operativo y navegador:
-- Versión de Node (`node --version`):
+- Uni version or commit:
+- Operating system and browser:
+- Node version (`node --version`):
 
-**Antes de publicar:** quita llaves, tu email, datos de tu Sheet y de tu resume de todo lo que pegues.
+**Before posting:** remove keys, your email, and any data from your Sheet or resume from anything you paste.

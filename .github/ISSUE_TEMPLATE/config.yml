@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Reportar un problema de seguridad
+  - name: Report a security problem
     url: https://github.com/GiamSoo23/Uni/security/advisories/new
-    about: Por favor reporta las vulnerabilidades en privado.
+    about: Please report vulnerabilities privately.
