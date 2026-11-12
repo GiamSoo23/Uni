@@ -11,7 +11,16 @@ function readMaxAgeMs(): number {
   return Number.isFinite(hours) && hours > 0 ? hours * HOUR_MS : 168 * HOUR_MS
 }
 
-const cacheDir = process.env.UNI_CACHE_DIR ?? path.join(process.cwd(), '.cache')
+/**
+ * En Vercel solo `/tmp` se puede escribir, y se vacía cuando la instancia se
+ * recicla: una instancia nueva vuelve a descargar los datos una vez.
+ */
+function defaultCacheDir(): string {
+  if (process.env.VERCEL === '1') return '/tmp/uni-cache'
+  return path.join(process.cwd(), '.cache')
+}
+
+const cacheDir = process.env.UNI_CACHE_DIR ?? defaultCacheDir()
 const maxAgeMs = readMaxAgeMs()
 
 let memo: { result: SyncResult; checkedAt: number } | null = null
