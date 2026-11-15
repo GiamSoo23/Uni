@@ -2,6 +2,7 @@ import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 
 import { normalizeCompanyName } from '../companies/policy'
+import { isHttpUrl } from '../sheets/url'
 import {
   ALL_APPLICATION_HEADERS,
   addTrackingNoise,
@@ -14,15 +15,6 @@ import {
 } from './sheets-arbitraries'
 
 const SAMPLES = 200
-
-function isHttpUrl(value: string): boolean {
-  try {
-    const { protocol } = new URL(value)
-    return protocol === 'http:' || protocol === 'https:'
-  } catch {
-    return false
-  }
-}
 
 describe('sheets arbitraries', () => {
   it('arbApplicationRow meets the round-trip conditions of 4.4', () => {

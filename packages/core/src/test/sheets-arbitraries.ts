@@ -2,20 +2,11 @@ import fc from 'fast-check'
 
 import { normalizeCompanyName } from '../companies/policy'
 import type { ApplicationRow, RawCell } from '../sheets/types'
+import { isHttpUrl } from '../sheets/url'
 import { TRACKER_HEADER } from './sheets-fixtures'
 
 /** The 14 Applications_Tab columns: the real Tracker header plus Job ID. */
 export const ALL_APPLICATION_HEADERS = [...TRACKER_HEADER, 'Job ID'] as const
-
-/** True when `value` parses as an absolute URL with the http: or https: scheme (no trimming). */
-function isHttpUrl(value: string): boolean {
-  try {
-    const { protocol } = new URL(value)
-    return protocol === 'http:' || protocol === 'https:'
-  } catch {
-    return false
-  }
-}
 
 /** Uppercases each character with probability 1/2. Callers pass ASCII only. */
 function arbRandomCase(value: string): fc.Arbitrary<string> {
