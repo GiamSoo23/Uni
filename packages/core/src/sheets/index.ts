@@ -1,3 +1,4 @@
+export type { FreshApplications, SheetsGateway, TabInfo, WriteOp } from './gateway'
 export type {
   ApplicationRow,
   FailureCategory,
