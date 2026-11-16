@@ -1,8 +1,10 @@
 import fc from 'fast-check'
 
 import { normalizeCompanyName } from '../companies/policy'
+import { COMPANIES_COLUMNS } from '../sheets/overrides'
 import type { ApplicationRow, RawCell } from '../sheets/types'
 import { isHttpUrl } from '../sheets/url'
+import type { FakeSheetState, FakeTab } from './fake-gateway'
 import { TRACKER_HEADER } from './sheets-fixtures'
 
 /** The 14 Applications_Tab columns: the real Tracker header plus Job ID. */
@@ -227,3 +229,198 @@ export function arbCompanyVariant(company: string): fc.Arbitrary<string> {
       return `${before}${body.join('')}${after}`
     })
 }
+
+/** Title of the applications tab in `arbSheetState`, the default Applications_Tab name. */
+export const APPLICATIONS_TAB_TITLE = 'Tracker'
+/** Spellings of the Job ID header that the Header_Map matches. */
+export const JOB_ID_HEADER_VARIANTS = ['Job ID', ' job id ', 'JOB ID', 'job ID  '] as const
+/** Spellings of the Companies tab title that Sheet_Setup matches. */
+export const COMPANIES_TITLE_VARIANTS = ['Companies', ' companies', 'COMPANIES '] as const
+/** The owner's other tabs, which Uni must never read or write (Requirement 13.8). */
+export const OTHER_TAB_TITLES = [
+  'SHPE 2026',
+  'SHPE 2026 Agenda',
+  'SHPE 2026 Exhibitors',
+  'Summary',
+] as const
+
+type TabWithoutId = Omit<FakeTab, 'sheetId'>
+
+const COLUMN = {
+  company: 0,
+  role: 1,
+  link: 2,
+  dateApplied: 3,
+  status: 4,
+  industry: 7,
+  notes: 12,
+  jobId: 13,
+} as const
+
+/** Displayed text, including free-text dates and values that look like formulas. */
+const arbDisplay: fc.Arbitrary<string> = fc.oneof(
+  fc.constant(''),
+  fc.string({ unit: 'grapheme', maxLength: 12 }),
+  fc.constantFrom('=SUM(A1:A2)', "'quoted", '+1', 'sept 7', 'ago 17, 2026'),
+)
+
+/** Drops trailing '' cells, as rows typed in the Sheet come back from the API. */
+function trimTrailing(values: string[]): string[] {
+  let end = values.length
+  while (end > 0 && values[end - 1] === '') end -= 1
+  return values.slice(0, end)
+}
+
+function placeCells(cells: Partial<Record<keyof typeof COLUMN, string>>): string[] {
+  const values = Array.from({ length: ALL_APPLICATION_HEADERS.length }, () => '')
+  for (const field of Object.keys(COLUMN) as (keyof typeof COLUMN)[]) {
+    const value = cells[field]
+    if (value !== undefined) values[COLUMN[field]] = value
+  }
+  return trimTrailing(values)
+}
+
+function arbApplicationCells(withJobId: boolean): fc.Arbitrary<string[]> {
+  return fc
+    .record({
+      company: fc.constantFrom('Acme', 'Globex', 'Initech', 'Intercontinental Exchange', ''),
+      role: fc.constantFrom('Software Engineer Intern', 'Data Science Intern', ''),
+      link: fc.oneof(arbHttpUrl, arbDisplay),
+      dateApplied: arbDisplay,
+      status: fc.constantFrom('Submitted', 'Rejected', 'OA', 'NO ROLE', 'Not Started', ''),
+      industry: fc.constantFrom('Fintech', 'Retail', ''),
+      notes: arbDisplay,
+      jobId: withJobId
+        ? fc.option(
+            fc.uuid().map((id) => `simplify:${id}`),
+            { nil: '' },
+          )
+        : fc.constant(''),
+    })
+    .filter(({ company, role }) => company !== '' || role !== '')
+    .map(placeCells)
+}
+
+/** Company and Role empty, Notes not empty (Glossary: Spillover_Row). */
+const arbSpilloverCells: fc.Arbitrary<string[]> = fc
+  .tuple(
+    arbDisplay.filter((notes) => notes.trim() !== ''),
+    arbDisplay,
+  )
+  .map(([notes, dateApplied]) => placeCells({ dateApplied, notes }))
+
+function arbDataRow(withJobId: boolean): fc.Arbitrary<string[]> {
+  return fc.oneof(
+    { weight: 4, arbitrary: arbApplicationCells(withJobId) },
+    { weight: 1, arbitrary: arbSpilloverCells },
+    { weight: 1, arbitrary: fc.constant<string[]>([]) },
+  )
+}
+
+function arbTrailingEmptyRows(width: number): fc.Arbitrary<string[][]> {
+  return fc.array(
+    fc.integer({ min: 0, max: width }).map((length) => Array.from({ length }, () => '')),
+    { maxLength: 3 },
+  )
+}
+
+const arbApplicationsTab: fc.Arbitrary<TabWithoutId> = fc
+  .record({
+    jobIdHeader: fc.option(fc.constantFrom(...JOB_ID_HEADER_VARIANTS), { nil: null }),
+    emptyHeaders: fc.nat({ max: 3 }),
+    spareRows: fc.oneof(fc.constant(0), fc.integer({ min: 1, max: 20 })),
+    spareColumns: fc.oneof(fc.constant(0), fc.integer({ min: 1, max: 13 })),
+  })
+  .chain(({ jobIdHeader, emptyHeaders, spareRows, spareColumns }) => {
+    const header: string[] = [
+      ...TRACKER_HEADER,
+      ...(jobIdHeader === null ? [] : [jobIdHeader]),
+      ...Array.from({ length: emptyHeaders }, () => ''),
+    ]
+    return fc
+      .tuple(
+        fc.array(arbDataRow(jobIdHeader !== null), { maxLength: 8 }),
+        arbTrailingEmptyRows(header.length),
+      )
+      .map(([data, trailing]) => {
+        const rows = [header, ...data, ...trailing]
+        return {
+          title: APPLICATIONS_TAB_TITLE,
+          rowCount: rows.length + spareRows,
+          columnCount: header.length + spareColumns,
+          rows,
+        }
+      })
+  })
+
+const arbCompaniesTab: fc.Arbitrary<TabWithoutId> = fc
+  .record({
+    title: fc.constantFrom(...COMPANIES_TITLE_VARIANTS),
+    data: fc.array(
+      fc.tuple(
+        fc.constantFrom('Acme', 'Globex', 'Initech'),
+        fc.constantFrom('no_sponsorship', 'offers sponsorship', 'unknown policy'),
+        fc.constantFrom('', 'US only'),
+        arbDisplay,
+        fc.oneof(fc.constant(''), arbHttpUrl),
+        fc.constantFrom('2026-11-12', 'Nov 12, 2026', ''),
+      ),
+      { maxLength: 3 },
+    ),
+    spareRows: fc.nat({ max: 20 }),
+    spareColumns: fc.nat({ max: 3 }),
+  })
+  .map(({ title, data, spareRows, spareColumns }) => {
+    const rows = [[...COMPANIES_COLUMNS], ...data.map((values) => trimTrailing([...values]))]
+    return {
+      title,
+      rowCount: rows.length + spareRows,
+      columnCount: COMPANIES_COLUMNS.length + spareColumns,
+      rows,
+    }
+  })
+
+function arbOtherTab(title: string): fc.Arbitrary<TabWithoutId> {
+  return fc
+    .record({
+      rows: fc.array(fc.array(arbDisplay, { minLength: 1, maxLength: 4 }), {
+        minLength: 1,
+        maxLength: 3,
+      }),
+      spareRows: fc.nat({ max: 10 }),
+    })
+    .map(({ rows, spareRows }) => ({
+      title,
+      rowCount: rows.length + spareRows,
+      columnCount: 4,
+      rows,
+    }))
+}
+
+const arbOtherTabs: fc.Arbitrary<TabWithoutId[]> = fc
+  .subarray([...OTHER_TAB_TITLES])
+  .chain((titles) => fc.tuple(...titles.map(arbOtherTab)))
+
+/**
+ * Fake Sheets for `InMemorySheetsGateway`, in random tab order with distinct sheet ids:
+ * - a "Tracker" tab with the real header, with or without a Job ID variant and 0 to 3 trailing
+ *   empty header cells; data rows mixing applications, Spillover_Rows and empty rows; 0 to 3
+ *   trailing empty rows; a grid that is full or has spare rows and columns;
+ * - a Companies tab with a title variant, or none;
+ * - any subset of "SHPE 2026", "SHPE 2026 Agenda", "SHPE 2026 Exhibitors" and "Summary".
+ */
+export const arbSheetState: fc.Arbitrary<FakeSheetState> = fc
+  .tuple(arbApplicationsTab, fc.option(arbCompaniesTab, { nil: null }), arbOtherTabs)
+  .chain(([applications, companies, others]) => {
+    const tabs = [applications, ...(companies === null ? [] : [companies]), ...others]
+    return fc
+      .uniqueArray(fc.integer({ min: 0, max: 2_147_483_647 }), {
+        minLength: tabs.length,
+        maxLength: tabs.length,
+      })
+      .chain((ids) => {
+        const withIds = tabs.map((tab, i) => ({ ...tab, sheetId: ids[i] ?? i }))
+        return fc.shuffledSubarray(withIds, { minLength: tabs.length, maxLength: tabs.length })
+      })
+      .map((ordered) => ({ tabs: ordered }))
+  })
