@@ -2,6 +2,7 @@ import 'server-only'
 import { createPrivateKey, createSign, type KeyObject } from 'node:crypto'
 import type { Result, SheetsFailure } from '@uni/core'
 import { z } from 'zod'
+import { tokenSchema } from '@/lib/sheets/schemas'
 
 export const TOKEN_URL = 'https://oauth2.googleapis.com/token'
 /** The only scope Uni requests (Requirement 1.10). */
@@ -11,10 +12,8 @@ const ASSERTION_LIFETIME_S = 3600
 const EXPIRY_MARGIN_S = 60
 const TIMEOUT_MS = 10_000
 
-const tokenResponseSchema = z.object({
-  access_token: z.string().min(1),
-  expires_in: z.number().int().positive(),
-})
+// The OAuth endpoint reports errors as `{ error: 'invalid_grant' }`, unlike the Sheets API
+// shape in `googleErrorSchema`, so this schema stays here.
 const tokenErrorSchema = z.object({ error: z.string().regex(/^[a-z_]{1,64}$/) })
 
 export interface AccessTokenProvider {
@@ -134,7 +133,7 @@ export class ServiceAccountTokenProvider implements AccessTokenProvider {
       return failure('network', res.status, 'token_endpoint_error')
     }
 
-    const parsed = tokenResponseSchema.safeParse(body)
+    const parsed = tokenSchema.safeParse(body)
     if (!parsed.success) return failure('invalid_sheet', res.status, 'unexpected_response')
     const { access_token, expires_in } = parsed.data
     this.#cached = {
