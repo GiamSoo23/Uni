@@ -11,8 +11,14 @@ import {
   arbHeaderPermutation,
   arbHttpUrl,
   arbRawCell,
+  arbSheetState,
   arbTrackingNoise,
+  COMPANIES_TITLE_VARIANTS,
+  JOB_ID_HEADER_VARIANTS,
+  OTHER_TAB_TITLES,
 } from './sheets-arbitraries'
+import { InMemorySheetsGateway } from './fake-gateway'
+import { TRACKER_HEADER } from './sheets-fixtures'
 
 const SAMPLES = 200
 
@@ -86,5 +92,53 @@ describe('sheets arbitraries', () => {
         expect(normalizeCompanyName(variant)).toBe(normalizeCompanyName(company))
       }
     }
+  })
+
+  it('arbSheetState gives valid fake Sheets that cover every shape', async () => {
+    const seen = new Set<string>()
+    for (const state of fc.sample(arbSheetState, SAMPLES)) {
+      const gateway = new InMemorySheetsGateway(state)
+      const tracker = state.tabs.find((tab) => tab.title === 'Tracker')
+      expect(tracker).toBeDefined()
+      if (tracker === undefined) continue
+      const header = tracker.rows[0] ?? []
+      expect(header.slice(0, TRACKER_HEADER.length)).toEqual([...TRACKER_HEADER])
+      const jobId = header[TRACKER_HEADER.length] ?? ''
+      seen.add(jobId === '' ? 'no job id' : 'job id')
+      if (jobId !== '') expect(JOB_ID_HEADER_VARIANTS).toContain(jobId)
+      if (header.at(-1) === '') seen.add('trailing empty header')
+      const last = tracker.rows.at(-1) ?? []
+      if (tracker.rows.length > 1 && last.every((value) => value === '')) {
+        seen.add('trailing empty row')
+      }
+      const spillover = tracker.rows
+        .slice(1)
+        .some((r) => (r[0] ?? '') === '' && (r[1] ?? '') === '' && (r[12] ?? '').trim() !== '')
+      if (spillover) seen.add('spillover')
+      seen.add(tracker.rowCount === tracker.rows.length ? 'full grid' : 'spare rows')
+      const companies = state.tabs.find((tab) =>
+        (COMPANIES_TITLE_VARIANTS as readonly string[]).includes(tab.title),
+      )
+      seen.add(companies === undefined ? 'no companies' : 'companies')
+      for (const tab of state.tabs) {
+        if ((OTHER_TAB_TITLES as readonly string[]).includes(tab.title)) seen.add(tab.title)
+      }
+      const read = await gateway.readApplicationsFresh('Tracker')
+      expect(read.ok).toBe(true)
+    }
+    expect([...seen].sort()).toEqual(
+      [
+        'no job id',
+        'job id',
+        'trailing empty header',
+        'trailing empty row',
+        'spillover',
+        'full grid',
+        'spare rows',
+        'no companies',
+        'companies',
+        ...OTHER_TAB_TITLES,
+      ].sort(),
+    )
   })
 })
