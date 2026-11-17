@@ -1,4 +1,5 @@
 import type { Eligibility, Job } from '@uni/core'
+import type { ReactNode } from 'react'
 import { daysAgo, ELIGIBILITY_LABELS } from '@/lib/format'
 
 const TONES = {
@@ -12,21 +13,34 @@ const MAX_LOCATIONS = 3
 const SOURCE_TEXT = {
   simplify: 'From Simplify, for this role.',
   company: 'Company policy.',
+  sheet: 'From the Companies tab of your Sheet.',
   none: 'Neither Simplify nor the company list says. Check the posting.',
 } as const
+
+const SOURCE_SUFFIX = { company: ' · company', sheet: ' · your Sheet' } as const
+
+/** Where the answer comes from. A Company_Override from the Sheet is told apart from the base list (11.13). */
+function sourceOf(eligibility: Eligibility): keyof typeof SOURCE_TEXT {
+  if (eligibility.source === 'company' && eligibility.policy?.source === 'sheet') return 'sheet'
+  return eligibility.source
+}
 
 function EligibilityBadge({ eligibility }: { eligibility: Eligibility }) {
   const label = ELIGIBILITY_LABELS[eligibility.reason]
   const evidence = eligibility.policy?.evidence[0]
+  const source = sourceOf(eligibility)
   const title = [
-    SOURCE_TEXT[eligibility.source],
+    SOURCE_TEXT[source],
     eligibility.policy?.note,
     evidence && `“${evidence.quote}” (checked ${evidence.checkedAt})`,
   ]
     .filter(Boolean)
     .join(' ')
   const className = `rounded px-1.5 py-0.5 ${TONES[label.tone]}`
-  const text = eligibility.source === 'company' ? `${label.text} · company` : label.text
+  const text =
+    source === 'company' || source === 'sheet'
+      ? `${label.text}${SOURCE_SUFFIX[source]}`
+      : label.text
 
   if (evidence?.url) {
     return (
@@ -52,10 +66,13 @@ export function JobCard({
   job,
   eligibility,
   now,
+  controls,
 }: {
   job: Job
   eligibility: Eligibility
   now: Date
+  /** Client controls for the Sheet: Mark as applied, Undo or the applied badge. */
+  controls?: ReactNode
 }) {
   const extraLocations = job.locations.length - MAX_LOCATIONS
 
@@ -86,6 +103,7 @@ export function JobCard({
         <span className="text-xs text-zinc-500 dark:text-zinc-400">
           Posted {daysAgo(job.postedAt, now)}
         </span>
+        {controls}
         <a
           href={job.url}
           target="_blank"

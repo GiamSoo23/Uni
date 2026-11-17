@@ -64,6 +64,12 @@ export function FilterForm({ params, terms }: { params: ViewParams; terms: strin
           <option value="show">Show all</option>
         </select>
       </Field>
+      <Field label="Applied">
+        <select name="applied" defaultValue={params.applied} className={fieldClass}>
+          <option value="hide">Hide roles already in my Sheet</option>
+          <option value="show">Show them with their status</option>
+        </select>
+      </Field>
       <Field label="Posted">
         <select name="days" defaultValue={params.days} className={fieldClass}>
           <option value="all">Any time</option>

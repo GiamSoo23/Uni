@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { getListings } from '@/lib/jobs'
+import { clearSheetCache, getSheetsConfig } from '@/lib/sheets'
 
 export interface SyncState {
   ok: boolean
@@ -15,11 +16,13 @@ const STATUS_MESSAGES = {
   stale: 'Couldn’t reach GitHub. Showing the last saved copy.',
 } as const
 
-/** The "Sync now" button: ignores the age of the local copy and asks GitHub. */
+/** The "Sync now" button: ignores the age of the local copy, asks GitHub and rereads the Sheet. */
 export async function syncNow(previous: SyncState | null): Promise<SyncState> {
   void previous
   try {
     const result = await getListings({ force: true })
+    // The next render reads the Sheet again (12.5). Sheet_Setup never runs here (5.6).
+    if (getSheetsConfig().mode === 'enabled') clearSheetCache()
     revalidatePath('/')
     return { ok: result.status !== 'stale', message: STATUS_MESSAGES[result.status] }
   } catch (error) {

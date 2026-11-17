@@ -1,15 +1,22 @@
 import {
   availableTerms,
+  BASE_POLICIES,
   BASE_POLICY_INDEX,
+  buildApplicationIndex,
+  createPolicyIndex,
   eligibilityFor,
   filterJobs,
+  jobIdFor,
+  partitionApplied,
   type SyncResult,
 } from '@uni/core'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { AppliedBadge } from '@/components/applied-badge'
 import { FilterForm } from '@/components/filter-form'
 import { JobCard } from '@/components/job-card'
 import { Logo } from '@/components/logo'
+import { SheetStatus } from '@/components/sheet-status'
 import { formatDateTime } from '@/lib/format'
 import { getListings, syncIntervalHours } from '@/lib/jobs'
 import {
@@ -18,7 +25,9 @@ import {
   parseSearchParams,
   toJobFilters,
   type RawSearchParams,
+  type ViewParams,
 } from '@/lib/search-params'
+import { getSheetState } from '@/lib/sheets'
 import { SyncButton } from './sync-button'
 
 export default async function Home({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
@@ -40,10 +49,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
     )
   }
 
+  // Failures come back as values, so a Sheets problem never reaches the error page (2.7).
+  // Rendering only reads the Sheet; it never writes (5.5).
+  const sheet = await getSheetState()
+  const snapshot = sheet.mode === 'enabled' ? sheet.snapshot : null
   const now = new Date()
-  const policies = BASE_POLICY_INDEX
+  // Overrides from the Companies tab beat the base list (11.9).
+  const policies =
+    snapshot === null ? BASE_POLICY_INDEX : createPolicyIndex(BASE_POLICIES, snapshot.overrides)
   const filters = toJobFilters(params)
-  const filtered = filterJobs(listings.jobs, filters, { now, policies })
+  const matching = filterJobs(listings.jobs, filters, { now, policies })
+  const applied = partitionApplied(
+    matching,
+    snapshot === null ? null : buildApplicationIndex(snapshot.applications),
+    params.applied,
+  )
+  const filtered = applied.visible
   const hidden = filters.hideIneligible
     ? filterJobs(listings.jobs, { ...filters, hideIneligible: false }, { now, policies }).filter(
         (job) => eligibilityFor(job, policies).status === 'ineligible',
@@ -65,6 +86,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
           match these filters, out of {activeCount.toLocaleString('en')} active on Simplify. Last
           sync: {formatDateTime(listings.fetchedAt)}. Refreshes every {syncInterval()}.
           {hidden.length > 0 && ` ${hiddenSummary(hidden.length, hiddenByCompany)}`}
+          {applied.hiddenCount > 0 && ` ${appliedSummary(applied.hiddenCount, params)}`}
         </p>
         <SyncButton />
       </section>
@@ -80,15 +102,26 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
         </p>
       )}
 
+      <SheetStatus state={sheet} />
+
       <FilterForm params={params} terms={availableTerms(listings.jobs)} />
 
       {visible.length === 0 ? (
         <p className="py-12 text-center text-zinc-500">No roles match these filters.</p>
       ) : (
         <ul className="space-y-3">
-          {visible.map((job) => (
-            <JobCard key={job.id} job={job} eligibility={eligibilityFor(job, policies)} now={now} />
-          ))}
+          {visible.map((job) => {
+            const status = applied.badges.get(jobIdFor(job))
+            return (
+              <JobCard
+                key={job.id}
+                job={job}
+                eligibility={eligibilityFor(job, policies)}
+                now={now}
+                controls={status === undefined ? undefined : <AppliedBadge status={status} />}
+              />
+            )
+          })}
         </ul>
       )}
 
@@ -121,6 +154,19 @@ function hiddenSummary(hidden: number, byCompany: number): string {
   const roles = hidden === 1 ? 'role' : 'roles'
   const detail = byCompany > 0 ? ` (${byCompany} by company policy)` : ''
   return `${hidden} ${roles} hidden because they don’t accept international students${detail}.`
+}
+
+function appliedSummary(count: number, params: ViewParams): ReactNode {
+  const roles = count === 1 ? 'role' : 'roles'
+  return (
+    <>
+      {count} {roles} hidden because they’re already in your Sheet (
+      <Link href={hrefWith(params, { applied: 'show', page: 1 })} className="underline">
+        show them
+      </Link>
+      ).
+    </>
+  )
 }
 
 function syncInterval(): string {
