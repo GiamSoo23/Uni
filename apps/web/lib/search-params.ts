@@ -21,6 +21,8 @@ const searchParamsSchema = z.object({
   region: z.enum(['us', 'any']).catch(DEFAULT_FILTERS.region),
   eligible: z.enum(['hide', 'show']).catch('hide'),
   days: z.enum(['all', '3', '7', '14', '30']).catch('all'),
+  /** Roles already in the Sheet with an Applied_Status: hidden by default (7.2). */
+  applied: z.enum(['hide', 'show']).catch('hide'),
   page: z.coerce.number().int().min(1).max(10_000).catch(1),
 })
 
@@ -44,7 +46,7 @@ export function toJobFilters(params: ViewParams): JobFilters {
   }
 }
 
-/** URL of the same view with some params changed (for pagination). */
+/** URL of the same view with some params changed (for pagination). Keeps every param, `applied` included. */
 export function hrefWith(params: ViewParams, changes: Partial<ViewParams>): string {
   const next = { ...params, ...changes }
   const query = new URLSearchParams()
