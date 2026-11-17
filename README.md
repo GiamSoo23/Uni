@@ -53,19 +53,20 @@ Uni deploys to Vercel (Hobby plan, free) with Vercel Authentication on every dep
 
 ## Commands
 
-| Command          | What it does                                     |
-| ---------------- | ------------------------------------------------ |
-| `npm run dev`    | Development server                               |
-| `npm run check`  | Lint, typecheck and tests for the whole monorepo |
-| `npm run build`  | Production build                                 |
-| `npm run format` | Format with Prettier                             |
+| Command                     | What it does                                                      |
+| --------------------------- | ----------------------------------------------------------------- |
+| `npm run dev`               | Development server                                                |
+| `npm run check`             | Lint, typecheck and tests for the whole monorepo                  |
+| `npm run build`             | Production build                                                  |
+| `npm run format`            | Format with Prettier                                              |
+| `npm run check:sheets-docs` | Check that the Sheets docs, `.env.example` and `.gitignore` agree |
 
 ## Layout
 
 ```
 apps/web/        Next.js 16: job inbox, filters and "Sync now"
 packages/core/   Domain: Simplify schema, normalization, filters, cache
-scripts/         setup-github.sh creates the labels and milestones with gh
+scripts/         setup-github.sh (labels and milestones), check-sheets-docs.mjs
 docs/            Deployment and Google Sheet guides
 .github/         CI, gitleaks scan, commit message check and templates
 .husky/          Local hook that checks each commit message
