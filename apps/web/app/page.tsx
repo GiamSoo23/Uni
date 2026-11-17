@@ -15,7 +15,9 @@ import type { ReactNode } from 'react'
 import { AppliedBadge } from '@/components/applied-badge'
 import { FilterForm } from '@/components/filter-form'
 import { JobCard } from '@/components/job-card'
+import { AppliedGate, AppliedStateProvider } from '@/components/job-list'
 import { Logo } from '@/components/logo'
+import { MarkAppliedButton } from '@/components/mark-applied'
 import { SheetStatus } from '@/components/sheet-status'
 import { formatDateTime } from '@/lib/format'
 import { getListings, syncIntervalHours } from '@/lib/jobs'
@@ -109,20 +111,31 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
       {visible.length === 0 ? (
         <p className="py-12 text-center text-zinc-500">No roles match these filters.</p>
       ) : (
-        <ul className="space-y-3">
-          {visible.map((job) => {
-            const status = applied.badges.get(jobIdFor(job))
-            return (
-              <JobCard
-                key={job.id}
-                job={job}
-                eligibility={eligibilityFor(job, policies)}
-                now={now}
-                controls={status === undefined ? undefined : <AppliedBadge status={status} />}
-              />
-            )
-          })}
-        </ul>
+        <AppliedStateProvider mode={params.applied}>
+          <ul className="space-y-3">
+            {visible.map((job) => {
+              const jobId = jobIdFor(job)
+              const status = applied.badges.get(jobId)
+              // The button only when the Sheet is configured and the role isn't applied (8.1).
+              const controls =
+                status !== undefined ? (
+                  <AppliedBadge status={status} />
+                ) : sheet.mode === 'enabled' ? (
+                  <MarkAppliedButton jobId={jobId} />
+                ) : undefined
+              return (
+                <AppliedGate key={job.id} jobId={jobId} label={`${job.company} · ${job.title}`}>
+                  <JobCard
+                    job={job}
+                    eligibility={eligibilityFor(job, policies)}
+                    now={now}
+                    controls={controls}
+                  />
+                </AppliedGate>
+              )
+            })}
+          </ul>
+        </AppliedStateProvider>
       )}
 
       {pageCount > 1 && (
