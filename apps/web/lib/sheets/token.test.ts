@@ -62,6 +62,19 @@ describe('ServiceAccountTokenProvider', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
+  it('shares one in-flight token request between concurrent callers', async () => {
+    const { provider, fetchMock } = setup([json(200, { access_token: 'tok-1', expires_in: 3600 })])
+
+    const results = await Promise.all([
+      provider.getToken(),
+      provider.getToken(),
+      provider.getToken(),
+    ])
+
+    expect(results).toEqual(Array.from({ length: 3 }, () => ({ ok: true, value: 'tok-1' })))
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
   it('maps invalid_grant and a malformed key to permission_denied', async () => {
     const { provider } = setup([json(400, { error: 'invalid_grant', error_description: 'x' })])
     expect(await provider.getToken()).toEqual({
