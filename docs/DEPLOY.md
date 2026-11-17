@@ -10,19 +10,37 @@ Since September 2026, Vercel Authentication protects every deployment, productio
 2. **Add New… → Project** and import `GiamSoo23/Uni`. If it isn't listed, give Vercel's GitHub App access to that repo.
 3. In the import settings:
    - **Root Directory:** `apps/web`. Vercel detects Next.js and the npm workspaces, so it installs from the repo root and `@uni/core` is available.
-   - No environment variables are needed. `UNI_SYNC_MAX_AGE_HOURS` is optional (default 168, one week).
+   - No environment variables are needed for the inbox. `UNI_SYNC_MAX_AGE_HOURS` is optional (default 168, one week). To connect your Google Sheet, add the variables in [Google Sheet variables](#google-sheet-variables), now or later.
 4. **Deploy.**
 5. **Before sharing the URL with anyone:** in the project, open **Settings → Deployment Protection → Vercel Authentication**, turn it on and choose **All Deployments**. Save.
 6. Check in a private window that the production URL asks you to sign in.
+
+## Google Sheet variables
+
+To connect your Sheet, follow the setup in [SHEETS.md](SHEETS.md), then add these in **Settings → Environment Variables**. Apply them to Production and Preview, and redeploy, because Uni reads them when a server instance starts.
+
+| Variable                       | Required | Default            |
+| ------------------------------ | -------- | ------------------ |
+| `UNI_SHEET_ID`                 | Yes      |                    |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Yes      |                    |
+| `GOOGLE_PRIVATE_KEY`           | Yes      |                    |
+| `UNI_RESUME_VERSION`           | No       | empty              |
+| `UNI_TIME_ZONE`                | No       | `America/New_York` |
+| `UNI_SHEET_TAB`                | No       | `Tracker`          |
+
+Paste `GOOGLE_PRIVATE_KEY` on one line with `\n` for each newline, exactly as it appears in the key file. Mark it as **Sensitive** so its value can't be read back from the dashboard.
+
+If any required variable is missing or invalid, Uni runs with the Sheet disabled: the inbox works, shows every role without hiding the ones you applied to, has no "Mark as applied" button, and names the missing or invalid variables at the top. It never shows their values.
 
 ## How it works on Vercel
 
 - Every push to `main` deploys production, and every pull request gets a preview deployment, also protected.
 - The copy of `listings.json` lives in `/tmp/uni-cache`, the only writable folder. It's lost when Vercel recycles the instance, and the next visit downloads it again (~13 MB, a few seconds).
 - "Sync now" refreshes the instance that handles the request. If Vercel runs several instances, another one may show the previous copy until its own refresh.
+- Each instance keeps what it read from your Sheet for 60 seconds. Mark as applied, Undo and "Sync now" clear that copy on the instance that handles them.
 
 ## What this protection doesn't cover
 
 - **The code** stays public on GitHub. That doesn't give access to the app or its environment variables.
-- **Claude and Google keys** (later milestones) go in the project's **Settings → Environment Variables** on Vercel, never in the repo.
+- **Claude and Google keys** go in the project's **Settings → Environment Variables** on Vercel, never in the repo.
 - If the app ever has more users, it will need its own login with an allowlist of emails. For a single user, Vercel Authentication is enough.

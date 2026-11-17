@@ -22,8 +22,22 @@ and include how to reproduce the problem. Uni is maintained by one person, so a 
 | Simplify data               | `apps/web/.cache/`, or `/tmp` on Vercel         | Public data. Validated with Zod; links that aren't http(s) are dropped |
 | The app online              | Vercel                                          | Vercel Authentication on all deployments                               |
 | Claude key (M5)             | `.env.local` or Vercel environment variables    | Read only by the server. Never sent to the browser or written to logs  |
-| Google service account (M3) | Environment variables, never a file in the repo | Can only access the Sheet you share with it                            |
+| Google service account (M3) | Environment variables, never a file in the repo | Only the `spreadsheets` scope, and only the Sheets you share with it   |
 | Your resume and your Sheet  | Your computer and your Google account           | Never committed                                                        |
+
+## Google service account
+
+- **Credentials live only in environment variables:** `apps/web/.env.local` on your computer, which `.gitignore` excludes, and the Vercel project settings online. Uni reads them in server-only code and never sends them to the browser or writes them to logs.
+- **Never commit a key file.** `.gitignore` excludes `service-account*.json` and `*-credentials.json` in every folder, and gitleaks scans every pull request. Delete the downloaded JSON once its two values are in `.env.local`.
+- **One scope.** The service account requests only `https://www.googleapis.com/auth/spreadsheets`. It has no Drive, Gmail or project roles.
+- **Only shared Sheets.** A service account can open only the spreadsheets explicitly shared with its email. Keep your Sheet's link sharing on "Restricted".
+
+### If a key leaks
+
+1. In the Google Cloud console, open **IAM & Admin → Service Accounts**, choose the account, then **Keys**, and **delete the leaked key**. It stops working at once.
+2. **Create a new JSON key** for the same account (**Add key → Create new key → JSON**).
+3. **Update `GOOGLE_PRIVATE_KEY`** in `apps/web/.env.local` and in the Vercel project settings, then restart the dev server and redeploy. Delete the new key file.
+4. If the key reached a git commit, deleting the key is what protects you. Rewriting history doesn't remove copies others may have.
 
 ## Before spending money (M6)
 
