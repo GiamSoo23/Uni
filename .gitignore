@@ -18,6 +18,7 @@ next-env.d.ts
 !.env.example
 *.pem
 service-account*.json
+*-credentials.json
 credentials*.json
 resume*.pdf
 
