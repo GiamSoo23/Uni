@@ -88,7 +88,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
           match these filters, out of {activeCount.toLocaleString('en')} active on Simplify. Last
           sync: {formatDateTime(listings.fetchedAt)}. Refreshes every {syncInterval()}.
           {hidden.length > 0 && ` ${hiddenSummary(hidden.length, hiddenByCompany)}`}
-          {applied.hiddenCount > 0 && ` ${appliedSummary(applied.hiddenCount, params)}`}
+          {applied.hiddenCount > 0 && <> {appliedSummary(applied.hiddenCount, params)}</>}
         </p>
         <SyncButton />
       </section>
