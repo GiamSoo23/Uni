@@ -13,6 +13,10 @@ Notable changes to Uni. The format follows [Keep a Changelog](https://keepachang
 - Vercel deployment: the cache uses `/tmp` and Node is pinned to 24.x. Guide in `docs/DEPLOY.md`.
 - A fishing hook favicon, also shown next to the name.
 - Company eligibility policies: a sourced list of companies whose internships rule out international students. The inbox hides their roles, says how many it hid, and links each label to its evidence.
+- Google Sheet sync through a service account. The inbox hides roles already in your Sheet, with an **Applied** filter to show them with their Status. Guide in `docs/SHEETS.md`.
+- **Mark as applied** adds a row in your format right below your last row, and **Undo** removes it for 10 seconds.
+- A **Companies** tab in your Sheet overrides the public company list.
+- If Google fails, the inbox keeps working with the last good read of your Sheet, and names what failed.
 
 ### Changed
 
@@ -24,3 +28,4 @@ Notable changes to Uni. The format follows [Keep a Changelog](https://keepachang
 - Online, Vercel Authentication protects every deployment: only the owner gets in.
 - Locally, the app only listens on `127.0.0.1`.
 - gitleaks scans the full history on every pull request.
+- The Sheet's service account asks only for the spreadsheets scope. Values starting with `=`, `+`, `-` or `@` are written as text, never as formulas.
