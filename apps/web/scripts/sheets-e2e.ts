@@ -235,4 +235,7 @@ function report(checks: readonly Check[]): number {
   return failed === 0 ? 0 : 1
 }
 
-process.exitCode = await main()
+// No top-level await: apps/web is CommonJS, so tsx compiles this file to CJS.
+void main().then((code) => {
+  process.exitCode = code
+})
