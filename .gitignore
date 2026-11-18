@@ -26,3 +26,7 @@ resume*.pdf
 .DS_Store
 *.log
 coverage/
+
+# Local planning notes and the Kiro spec (they hold the owner's Sheet ID): kept off GitHub
+.kiro/
+PENDIENTES.md
