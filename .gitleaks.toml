@@ -5,3 +5,14 @@ title = "Uni"
 
 [extend]
 useDefault = true
+
+# apps/web/lib/sheets/config.test.ts holds a made-up key ("not-a-real-key") to test
+# config parsing. The private-key rule joins its BEGIN on line 7 with the END on
+# line 35. Only that rule, that file and that text are allowed.
+[[allowlists]]
+description = "Made-up private key in the Sheets config test"
+targetRules = ["private-key"]
+condition = "AND"
+paths = ['''^apps/web/lib/sheets/config\.test\.ts$''']
+regexTarget = "match"
+regexes = ['''not-a-real-key''']
