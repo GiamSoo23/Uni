@@ -12,12 +12,17 @@ const MAX_LOCATIONS = 3
 
 const SOURCE_TEXT = {
   simplify: 'From Simplify, for this role.',
+  description: 'From this posting’s description:',
   company: 'Company policy.',
   sheet: 'From the Companies tab of your Sheet.',
   none: 'Neither Simplify nor the company list says. Check the posting.',
 } as const
 
-const SOURCE_SUFFIX = { company: ' · company', sheet: ' · your Sheet' } as const
+const SOURCE_SUFFIX = {
+  description: ' · posting',
+  company: ' · company',
+  sheet: ' · your Sheet',
+} as const
 
 /** Where the answer comes from. A Company_Override from the Sheet is told apart from the base list (11.13). */
 function sourceOf(eligibility: Eligibility): keyof typeof SOURCE_TEXT {
@@ -25,12 +30,19 @@ function sourceOf(eligibility: Eligibility): keyof typeof SOURCE_TEXT {
   return eligibility.source
 }
 
-function EligibilityBadge({ eligibility }: { eligibility: Eligibility }) {
+function EligibilityBadge({
+  eligibility,
+  postingUrl,
+}: {
+  eligibility: Eligibility
+  postingUrl: string
+}) {
   const label = ELIGIBILITY_LABELS[eligibility.reason]
   const evidence = eligibility.policy?.evidence[0]
   const source = sourceOf(eligibility)
   const title = [
     SOURCE_TEXT[source],
+    eligibility.flag && `“${eligibility.flag.quote}”`,
     eligibility.policy?.note,
     evidence && `“${evidence.quote}” (checked ${evidence.checkedAt})`,
   ]
@@ -38,14 +50,16 @@ function EligibilityBadge({ eligibility }: { eligibility: Eligibility }) {
     .join(' ')
   const className = `rounded px-1.5 py-0.5 ${TONES[label.tone]}`
   const text =
-    source === 'company' || source === 'sheet'
+    source === 'description' || source === 'company' || source === 'sheet'
       ? `${label.text}${SOURCE_SUFFIX[source]}`
       : label.text
+  // A flag from the description links to the posting it quotes.
+  const href = source === 'description' ? postingUrl : evidence?.url
 
-  if (evidence?.url) {
+  if (href) {
     return (
       <a
-        href={evidence.url}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         title={title}
@@ -86,7 +100,7 @@ export function JobCard({
           {extraLocations > 0 && ` · +${extraLocations}`}
         </p>
         <div className="flex flex-wrap gap-1.5 pt-1 text-xs">
-          <EligibilityBadge eligibility={eligibility} />
+          <EligibilityBadge eligibility={eligibility} postingUrl={job.url} />
           {job.terms.map((term) => (
             <span key={term} className={`rounded px-1.5 py-0.5 ${TONES.neutral}`}>
               {term}
