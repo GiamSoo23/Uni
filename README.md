@@ -2,7 +2,7 @@
 
 Uni puts open internships on one page, hides the ones that don't accept international students, and links straight to each application.
 
-> Status: M2 done, M3 in review, part of M8 pulled forward. The job inbox runs privately on Vercel, hides roles from companies that rule out international students, and syncs with your Google Sheet. Claude evaluation comes next. The plan is in [PLAN.md](PLAN.md) and progress is tracked in the [milestones](https://github.com/GiamSoo23/Uni/milestones).
+> Status: M3 done, with parts of M6 and M8 pulled forward. The job inbox runs privately on Vercel, hides roles whose company or posting rules out international students, and syncs with your Google Sheet. Claude evaluation comes next. The plan is in [PLAN.md](PLAN.md) and progress is tracked in the [milestones](https://github.com/GiamSoo23/Uni/milestones).
 
 ## What it does today
 
@@ -10,6 +10,7 @@ Uni puts open internships on one page, hides the ones that don't accept internat
 - Validates every record with Zod and drops the ones that don't match the schema. If a download fails, it keeps showing the last good copy.
 - Filters by term, category, region (US and US remote), posting date and text.
 - Hides roles international students can't apply to, and labels every role with where that answer comes from.
+- Reads each posting's description on Greenhouse, Lever, Ashby and Workday, and hides the role when it requires U.S. citizenship, U.S. person status, a security clearance, or says there's no visa sponsorship.
 - Connects to the Google Sheet where you track applications. It's optional: without it, the inbox works as before.
 
 ## Your Google Sheet
@@ -23,14 +24,24 @@ With your Sheet connected ([setup guide](docs/SHEETS.md)):
 
 ## How eligibility is decided
 
-Simplify marks almost every role as "Other" for sponsorship, so its flag alone hides very few roles. Uni checks two sources, in this order:
+Simplify marks almost every role as "Other" for sponsorship, so its flag alone hides very few roles. Uni checks these sources, in this order:
 
-1. **Simplify's flag for the role:** "Does Not Offer Sponsorship", "U.S. Citizenship is Required" or "Offers Sponsorship".
-2. **The company's policy**, from a [sourced list](packages/core/src/companies/policies.json): `accepts`, `no_sponsorship`, `us_person_required`, `citizenship_required` or `clearance_required`. Each entry quotes a current posting, with its URL and the date it was checked.
+1. **A restriction in Simplify's flag for the role:** "Does Not Offer Sponsorship" or "U.S. Citizenship is Required".
+2. **What the posting itself says.** Uni reads the description and looks for sentences that require U.S. citizenship, U.S. person status (ITAR/EAR) or a security clearance, or that rule out visa sponsorship. The role shows "· posting", and the label links to the posting with the sentence in a tooltip. This beats Simplify's "Offers Sponsorship" and any company policy, because it's specific to the role.
+3. **Simplify's "Offers Sponsorship".**
+4. **The company's policy**, from a [sourced list](packages/core/src/companies/policies.json): `accepts`, `no_sponsorship`, `us_person_required`, `citizenship_required` or `clearance_required`. Each entry quotes a current posting, with its URL and the date it was checked.
 
-If neither says anything, the role shows **Eligibility not verified**: nobody has checked it yet, which doesn't mean it accepts international students. On Nov 12, 2026, the company list hid 52 of the 721 Software roles for Summer 2027 in the US, from defense contractors that require U.S. citizenship, U.S. person status or a security clearance.
+If none of them says anything, the role shows **Eligibility not verified**: nobody has checked it yet, which doesn't mean it accepts international students.
 
-Your own Google Sheet can override the list with its [Companies tab](docs/SHEETS.md#the-companies-tab), and Claude will read each job description (M6). To add a company, see [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-company-policy).
+Your own Google Sheet can override the list with its [Companies tab](docs/SHEETS.md#the-companies-tab). To add a company, see [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-company-policy).
+
+### Reading the postings
+
+- **Which postings.** Uni reads postings on Greenhouse, Lever, Ashby and Workday through their public JSON APIs. It calls only those hosts, built from the listing's URL. Postings on other sites keep the other sources.
+- **When.** Reading happens after the page is sent, so the inbox never waits on a job board. Each visit reads up to 150 postings of the current results, newest first, and the summary says how many it has read so far. Each posting is read again after a week, or sooner if Simplify updates it.
+- **Rate limits.** Workday limits requests by IP across every company, so Uni reads it one posting at a time, up to 20 per visit, and leaves it alone for an hour after a 429.
+- **What's kept.** Only the result: the flags, the quoted sentence and a hash of the description. The descriptions themselves are never stored.
+- **Rules, not AI.** The detector favors precision, because a flag hides a role. It skips equal opportunity boilerplate, questions, negations such as "US Citizenship Required for this Position: No", preferences such as "clearance preferred", and sentences about export licenses rather than visas. Claude will read descriptions in M7. To see a hidden role, choose **Show all** in the eligibility filter.
 
 ## Requirements
 

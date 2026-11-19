@@ -37,6 +37,7 @@ If any required variable is missing or invalid, Uni runs with the Sheet disabled
 - Every push to `main` deploys production, and every pull request gets a preview deployment, also protected.
 - The copy of `listings.json` lives in `/tmp/uni-cache`, the only writable folder. It's lost when Vercel recycles the instance, and the next visit downloads it again (~13 MB, a few seconds).
 - "Sync now" refreshes the instance that handles the request. If Vercel runs several instances, another one may show the previous copy until its own refresh.
+- What Uni learned from posting descriptions lives in `/tmp/uni-cache/descriptions/flags.json`. A new instance starts empty and reads postings again as you browse.
 - Each instance keeps what it read from your Sheet for 60 seconds. Mark as applied, Undo and "Sync now" clear that copy on the instance that handles them.
 
 ## What this protection doesn't cover
