@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import type { DescriptionIndex } from '../descriptions/description-index'
+import { jobIdFor } from '../sheets/matcher'
 import { job, policy } from '../test/fixtures'
 import { eligibilityFor } from './eligibility'
 import { createPolicyIndex, EMPTY_POLICY_INDEX } from './policy'
@@ -53,5 +55,48 @@ describe('eligibilityFor', () => {
       policies,
     )
     expect(result).toMatchObject({ status: 'ineligible', source: 'simplify' })
+  })
+
+  describe('with a restriction from the posting', () => {
+    const flagged = (overrides: Parameters<typeof job>[0] = {}) => {
+      const role = job(overrides)
+      const descriptions: DescriptionIndex = new Map([
+        [jobIdFor(role), { kind: 'us_person_required', quote: 'Must be a U.S. person.' }],
+      ])
+      return eligibilityFor(role, policies, descriptions)
+    }
+
+    it('makes the role ineligible and keeps the quote', () => {
+      expect(flagged()).toEqual({
+        status: 'ineligible',
+        reason: 'us_person_required',
+        source: 'description',
+        policy: null,
+        flag: { kind: 'us_person_required', quote: 'Must be a U.S. person.' },
+      })
+    })
+
+    it('beats Simplify saying the role offers sponsorship', () => {
+      expect(flagged({ sponsorship: 'offers' })).toMatchObject({ source: 'description' })
+    })
+
+    it('beats a company that accepts international students', () => {
+      expect(flagged({ company: 'Friendly Bank' })).toMatchObject({ source: 'description' })
+    })
+
+    it('loses to a restriction Simplify states for the role', () => {
+      expect(flagged({ sponsorship: 'does_not_offer' })).toMatchObject({
+        source: 'simplify',
+        reason: 'no_sponsorship',
+      })
+    })
+
+    it('only applies to the posting it was found in', () => {
+      const other = job({ id: 'other' })
+      const descriptions: DescriptionIndex = new Map([
+        ['simplify:abc', { kind: 'no_sponsorship', quote: 'No visa sponsorship.' }],
+      ])
+      expect(eligibilityFor(other, EMPTY_POLICY_INDEX, descriptions).source).toBe('none')
+    })
   })
 })
