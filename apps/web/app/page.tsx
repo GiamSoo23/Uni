@@ -11,6 +11,7 @@ import {
   type SyncResult,
 } from '@uni/core'
 import Link from 'next/link'
+import { after } from 'next/server'
 import type { ReactNode } from 'react'
 import { AppliedBadge } from '@/components/applied-badge'
 import { FilterForm } from '@/components/filter-form'
@@ -19,6 +20,7 @@ import { AppliedGate, AppliedStateProvider } from '@/components/job-list'
 import { Logo } from '@/components/logo'
 import { MarkAppliedButton } from '@/components/mark-applied'
 import { SheetStatus } from '@/components/sheet-status'
+import { descriptionStore, type DescriptionCoverage } from '@/lib/descriptions'
 import { formatDateTime } from '@/lib/format'
 import { getListings, syncIntervalHours } from '@/lib/jobs'
 import {
@@ -60,7 +62,21 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
   const policies =
     snapshot === null ? BASE_POLICY_INDEX : createPolicyIndex(BASE_POLICIES, snapshot.overrides)
   const filters = toJobFilters(params)
-  const matching = filterJobs(listings.jobs, filters, { now, policies })
+  // Restrictions read from posting descriptions so far (#29). Reading more happens after the
+  // response, so the page never waits on a job board.
+  const descriptions = await descriptionStore.index()
+  const withIneligible = filterJobs(
+    listings.jobs,
+    { ...filters, hideIneligible: false },
+    { now, policies, descriptions },
+  )
+  // Roles Simplify or a company policy already rule out don't need their posting read.
+  const toRead = withIneligible.filter(
+    (job) => eligibilityFor(job, policies).status !== 'ineligible',
+  )
+  after(() => descriptionStore.scan(toRead))
+  const coverage = await descriptionStore.coverage(toRead)
+  const matching = filterJobs(listings.jobs, filters, { now, policies, descriptions })
   const applied = partitionApplied(
     matching,
     snapshot === null ? null : buildApplicationIndex(snapshot.applications),
@@ -68,13 +84,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
   )
   const filtered = applied.visible
   const hidden = filters.hideIneligible
-    ? filterJobs(listings.jobs, { ...filters, hideIneligible: false }, { now, policies }).filter(
-        (job) => eligibilityFor(job, policies).status === 'ineligible',
+    ? withIneligible.filter(
+        (job) => eligibilityFor(job, policies, descriptions).status === 'ineligible',
       )
     : []
-  const hiddenByCompany = hidden.filter(
-    (job) => eligibilityFor(job, policies).source === 'company',
-  ).length
+  const hiddenBy = (source: 'company' | 'description') =>
+    hidden.filter((job) => eligibilityFor(job, policies, descriptions).source === source).length
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const page = Math.min(params.page, pageCount)
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -87,7 +102,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
           <strong className="text-zinc-900 dark:text-zinc-100">{filtered.length}</strong> roles
           match these filters, out of {activeCount.toLocaleString('en')} active on Simplify. Last
           sync: {formatDateTime(listings.fetchedAt)}. Refreshes every {syncInterval()}.
-          {hidden.length > 0 && ` ${hiddenSummary(hidden.length, hiddenByCompany)}`}
+          {hidden.length > 0 &&
+            ` ${hiddenSummary(hidden.length, hiddenBy('company'), hiddenBy('description'))}`}
+          {coverage.read < coverage.readable && ` ${coverageSummary(coverage)}`}
           {applied.hiddenCount > 0 && <> {appliedSummary(applied.hiddenCount, params)}</>}
         </p>
         <SyncButton />
@@ -127,7 +144,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
                 <AppliedGate key={job.id} jobId={jobId} label={`${job.company} · ${job.title}`}>
                   <JobCard
                     job={job}
-                    eligibility={eligibilityFor(job, policies)}
+                    eligibility={eligibilityFor(job, policies, descriptions)}
                     now={now}
                     controls={controls}
                   />
@@ -163,10 +180,18 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
   )
 }
 
-function hiddenSummary(hidden: number, byCompany: number): string {
+function hiddenSummary(hidden: number, byCompany: number, byPosting: number): string {
   const roles = hidden === 1 ? 'role' : 'roles'
-  const detail = byCompany > 0 ? ` (${byCompany} by company policy)` : ''
+  const parts = [
+    byCompany > 0 && `${byCompany} by company policy`,
+    byPosting > 0 && `${byPosting} by what the posting says`,
+  ].filter(Boolean)
+  const detail = parts.length > 0 ? ` (${parts.join(', ')})` : ''
   return `${hidden} ${roles} hidden because they don’t accept international students${detail}.`
+}
+
+function coverageSummary({ read, readable }: DescriptionCoverage): string {
+  return `Uni has read ${read} of ${readable} of these postings for citizenship, clearance and sponsorship language, and reads more in the background.`
 }
 
 function appliedSummary(count: number, params: ViewParams): ReactNode {
