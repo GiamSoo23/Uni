@@ -20,7 +20,7 @@ function defaultCacheDir(): string {
   return path.join(process.cwd(), '.cache')
 }
 
-const cacheDir = process.env.UNI_CACHE_DIR ?? defaultCacheDir()
+export const cacheDir = process.env.UNI_CACHE_DIR ?? defaultCacheDir()
 const maxAgeMs = readMaxAgeMs()
 
 let memo: { result: SyncResult; checkedAt: number } | null = null
