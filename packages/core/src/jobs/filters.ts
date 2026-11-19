@@ -1,5 +1,6 @@
 import { eligibilityFor } from '../companies/eligibility'
 import { EMPTY_POLICY_INDEX, type PolicyIndex } from '../companies/policy'
+import { type DescriptionIndex, EMPTY_DESCRIPTION_INDEX } from '../descriptions/description-index'
 import type { Category, Job } from './job'
 import { isUSLocation } from './location'
 
@@ -23,6 +24,8 @@ export interface FilterOptions {
   now?: Date
   /** Company policies used to decide eligibility. Empty by default. */
   policies?: PolicyIndex
+  /** Restrictions found in posting descriptions. Empty by default. */
+  descriptions?: DescriptionIndex
 }
 
 export const DEFAULT_FILTERS: JobFilters = {
@@ -40,7 +43,11 @@ const DAY_MS = 24 * 60 * 60 * 1000
 export function filterJobs(
   jobs: readonly Job[],
   filters: JobFilters,
-  { now = new Date(), policies = EMPTY_POLICY_INDEX }: FilterOptions = {},
+  {
+    now = new Date(),
+    policies = EMPTY_POLICY_INDEX,
+    descriptions = EMPTY_DESCRIPTION_INDEX,
+  }: FilterOptions = {},
 ): Job[] {
   const query = filters.query.trim().toLowerCase()
   const since =
@@ -52,7 +59,10 @@ export function filterJobs(
       if (filters.term !== null && !job.terms.includes(filters.term)) return false
       if (filters.categories.length > 0 && !filters.categories.includes(job.category)) return false
       if (filters.region === 'us' && !job.locations.some(isUSLocation)) return false
-      if (filters.hideIneligible && eligibilityFor(job, policies).status === 'ineligible') {
+      if (
+        filters.hideIneligible &&
+        eligibilityFor(job, policies, descriptions).status === 'ineligible'
+      ) {
         return false
       }
       if (since !== null && job.postedAt.getTime() < since) return false
