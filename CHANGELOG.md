@@ -17,6 +17,7 @@ Notable changes to Uni. The format follows [Keep a Changelog](https://keepachang
 - **Mark as applied** adds a row in your format right below your last row, and **Undo** removes it for 10 seconds.
 - A **Companies** tab in your Sheet overrides the public company list.
 - If Google fails, the inbox keeps working with the last good read of your Sheet, and names what failed.
+- Uni reads each posting's description on Greenhouse, Lever, Ashby and Workday, and hides roles that require U.S. citizenship, U.S. person status or a security clearance, or that rule out visa sponsorship. The label says "· posting" and quotes the sentence.
 
 ### Changed
 
