@@ -17,6 +17,7 @@ export {
   type CompanyPolicyKind,
   type PolicyIndex,
 } from './companies/policy'
+export * from './descriptions'
 export { CATEGORIES, type Category, type Job, type Sponsorship } from './jobs/job'
 export {
   availableTerms,

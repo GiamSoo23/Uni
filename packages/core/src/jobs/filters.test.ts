@@ -53,6 +53,20 @@ describe('filterJobs', () => {
     expect(visible(false).sort()).toEqual(['bank', 'defense', 'other'])
   })
 
+  it('hides roles whose posting states a restriction', () => {
+    const jobs = [job({ id: 'itar' }), job({ id: 'open' })]
+    const descriptions = new Map([
+      ['simplify:itar', { kind: 'us_person_required' as const, quote: 'Must be a U.S. person.' }],
+    ])
+    const visible = (hideIneligible: boolean) =>
+      filterJobs(jobs, { ...DEFAULT_FILTERS, hideIneligible }, { now, descriptions }).map(
+        (j) => j.id,
+      )
+
+    expect(visible(true)).toEqual(['open'])
+    expect(visible(false).sort()).toEqual(['itar', 'open'])
+  })
+
   it('includes other regions with region "any"', () => {
     expect(ids({ region: 'any' })).toContain('canada')
   })
