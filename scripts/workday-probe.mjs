@@ -26,21 +26,46 @@ for (const row of listings) {
   if (match === null || tenants.has(match[2])) continue
   tenants.add(match[2])
   apis.push(`https://${match[1]}/wday/cxs/${match[2]}/${match[3]}/${match[4]}`)
-  if (apis.length === 15) break
+  if (apis.length === 20) break
 }
 
-for (const [label, headers] of [
-  ['default headers', { accept: 'application/json' }],
-  ['browser headers', BROWSER],
-]) {
-  const counts = {}
-  for (const url of apis) {
-    const status = await fetch(url, { headers, signal: AbortSignal.timeout(10_000) })
-      .then((r) => r.status)
-      .catch((error) => error.name)
-    counts[status] = (counts[status] ?? 0) + 1
-    console.log(`${label}  ${status}  ${new URL(url).hostname}`)
-    await sleep(1500)
-  }
-  console.log(`${label}: ${JSON.stringify(counts)}`)
+async function get(url, headers) {
+  return fetch(url, { headers, signal: AbortSignal.timeout(10_000) }).catch(() => null)
 }
+
+/** Browser headers, the Cloudflare cookie from earlier answers, and two retries after 4 s and 8 s. */
+const jar = new Map()
+async function patient(url) {
+  const host = new URL(url).hostname
+  for (const wait of [0, 4000, 8000]) {
+    if (wait > 0) await sleep(wait)
+    const cookie = jar.get(host)
+    const response = await get(url, cookie ? { ...BROWSER, cookie } : BROWSER)
+    const set = response?.headers.get('set-cookie')?.split(';')[0]
+    if (set) jar.set(host, set)
+    if (response?.status !== 429) return response?.status ?? 'error'
+  }
+  return 429
+}
+
+const variants = {
+  default: async (url) => (await get(url, { accept: 'application/json' }))?.status ?? 'error',
+  browser: async (url) => (await get(url, BROWSER))?.status ?? 'error',
+  patient,
+}
+const counts = Object.fromEntries(Object.keys(variants).map((name) => [name, {}]))
+for (const [index, url] of apis.entries()) {
+  // Rotate the order so no variant always goes first.
+  const names = Object.keys(variants)
+  const order = [...names.slice(index % 3), ...names.slice(0, index % 3)]
+  const line = []
+  for (const name of order) {
+    const status = await variants[name](url)
+    counts[name][status] = (counts[name][status] ?? 0) + 1
+    line.push(`${name}=${status}`)
+    await sleep(2000)
+  }
+  console.log(`${new URL(url).hostname}  ${line.join('  ')}`)
+}
+for (const [name, result] of Object.entries(counts))
+  console.log(`total ${name}: ${JSON.stringify(result)}`)
