@@ -18,6 +18,7 @@ Notable changes to Uni. The format follows [Keep a Changelog](https://keepachang
 - A **Companies** tab in your Sheet overrides the public company list.
 - If Google fails, the inbox keeps working with the last good read of your Sheet, and names what failed.
 - Uni reads each posting's description on Greenhouse, Lever, Ashby and Workday, and hides roles that require U.S. citizenship, U.S. person status or a security clearance, or that rule out visa sponsorship. The label says "· posting" and quotes the sentence.
+- When a job board refuses Uni's requests, as Workday does from Vercel, the summary says how many postings on it couldn't be read.
 
 ### Changed
 

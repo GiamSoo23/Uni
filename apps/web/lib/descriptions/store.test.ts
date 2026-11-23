@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import type { DescriptionRead, DescriptionReader, Job } from '@uni/core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createDescriptionStore, RECHECK_MS, RETRY_MS, type ScanLimits } from './store'
+import { COOLDOWN_MS, createDescriptionStore, RECHECK_MS, RETRY_MS, type ScanLimits } from './store'
 
 const GREENHOUSE = (id: number) => `https://job-boards.greenhouse.io/acme/jobs/${id}`
 const WORKDAY = (id: number) => `https://acme.wd1.myworkdayjobs.com/site/job/Remote/Intern_${id}`
@@ -84,11 +84,11 @@ describe('createDescriptionStore', () => {
   it('skips URLs it cannot read and counts coverage over the readable ones', async () => {
     const { store, read } = setup(() => text('Great internship.'))
     const jobs = [role('a', GREENHOUSE(1)), role('b', 'https://careers.example.com/1')]
-    expect(await store.coverage(jobs)).toEqual({ readable: 1, read: 0 })
+    expect(await store.coverage(jobs)).toEqual({ readable: 1, read: 0, refused: [] })
     await store.scan(jobs)
 
     expect(read).toHaveBeenCalledTimes(1)
-    expect(await store.coverage(jobs)).toEqual({ readable: 1, read: 1 })
+    expect(await store.coverage(jobs)).toEqual({ readable: 1, read: 1, refused: [] })
   })
 
   it('reads a posting again after a week, or when the job changes', async () => {
@@ -148,11 +148,22 @@ describe('createDescriptionStore', () => {
     const workdayCalls = () => read.mock.calls.filter(([url]) => url.includes('myworkdayjobs'))
     await store.scan(jobs)
     expect(workdayCalls()).toHaveLength(1)
-    expect(await store.coverage(jobs)).toEqual({ readable: 4, read: 2 })
+    // Both unread Workday postings count as refused, including the one never tried.
+    expect(await store.coverage(jobs)).toEqual({
+      readable: 4,
+      read: 2,
+      refused: [{ ats: 'workday', count: 2 }],
+    })
 
     // Paused for an hour: a second scan doesn't touch Workday.
     await store.scan(jobs)
     expect(workdayCalls()).toHaveLength(1)
+
+    // After the hour, Workday is tried again and no longer counts as refused.
+    clock += COOLDOWN_MS
+    expect((await store.coverage(jobs)).refused).toEqual([])
+    await store.scan(jobs)
+    expect(workdayCalls()).toHaveLength(2)
   })
 
   it('respects the per-scan limits, in the order given', async () => {

@@ -190,8 +190,15 @@ function hiddenSummary(hidden: number, byCompany: number, byPosting: number): st
   return `${hidden} ${roles} hidden because they don’t accept international students${detail}.`
 }
 
-function coverageSummary({ read, readable }: DescriptionCoverage): string {
-  return `Uni has read ${read} of ${readable} of these postings for citizenship, clearance and sponsorship language, and reads more in the background.`
+const ATS_NAMES = { greenhouse: 'Greenhouse', lever: 'Lever', ashby: 'Ashby', workday: 'Workday' }
+
+function coverageSummary({ read, readable, refused }: DescriptionCoverage): string {
+  const base = `Uni has read ${read} of ${readable} of these postings for citizenship, clearance and sponsorship language`
+  if (refused.length === 0) return `${base}, and reads more in the background.`
+  const blocked = refused.map(({ ats, count }) => `${count} on ${ATS_NAMES[ats]}`).join(' and ')
+  const verb = refused.length === 1 ? 'is' : 'are'
+  const names = refused.map(({ ats }) => ATS_NAMES[ats]).join(' and ')
+  return `${base}. ${names} ${verb} refusing Uni’s requests from this server right now, so ${blocked} can’t be read yet; check those postings yourself. Uni tries again every hour.`
 }
 
 function appliedSummary(count: number, params: ViewParams): ReactNode {
