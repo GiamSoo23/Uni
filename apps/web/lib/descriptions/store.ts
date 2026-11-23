@@ -67,6 +67,11 @@ export interface DescriptionCoverage {
   readable: number
   /** Of those, how many it has read. */
   read: number
+  /**
+   * Unread postings on an ATS that answered 429 within the last hour, most first. Workday refuses
+   * cloud networks such as Vercel's, so online this is usually every Workday posting.
+   */
+  refused: { ats: DescriptionAts; count: number }[]
 }
 
 export interface DescriptionStore {
@@ -236,15 +241,28 @@ export function createDescriptionStore(options: DescriptionStoreOptions): Descri
 
     async coverage(jobs) {
       const current = await load()
+      const at = now()
       let readable = 0
       let read = 0
+      const refused = new Map<DescriptionAts, number>()
       for (const job of jobs) {
-        if (descriptionSourceFor(job.url) === null) continue
+        const source = descriptionSourceFor(job.url)
+        if (source === null) continue
         readable += 1
         const outcome = current.get(jobIdFor(job))?.outcome
-        if (outcome === 'clear' || outcome === 'flagged') read += 1
+        if (outcome === 'clear' || outcome === 'flagged') {
+          read += 1
+        } else if ((pausedUntil.get(source.ats) ?? 0) > at) {
+          refused.set(source.ats, (refused.get(source.ats) ?? 0) + 1)
+        }
       }
-      return { readable, read }
+      return {
+        readable,
+        read,
+        refused: [...refused]
+          .map(([ats, count]) => ({ ats, count }))
+          .sort((a, b) => b.count - a.count),
+      }
     },
 
     async scan(jobs) {
